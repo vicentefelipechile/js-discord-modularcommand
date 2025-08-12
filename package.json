@@ -10,12 +10,20 @@
   "license": "MIT",
   "author": "SummerTYT",
   "type": "commonjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
   "main": "index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prepublish": "npm run build"
   },
   "dependencies": {
-    "discord.js": "^14.21.0",
+    "discord.js": "^14.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.2.1",
     "typescript": "^5.9.2"
   }
 }
