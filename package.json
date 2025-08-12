@@ -1,0 +1,21 @@
+{
+  "name": "js-discord-modularcommand",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [
+    "discord",
+    "js",
+    "node"
+  ],
+  "license": "MIT",
+  "author": "SummerTYT",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "discord.js": "^14.21.0",
+    "typescript": "^5.9.2"
+  }
+}
