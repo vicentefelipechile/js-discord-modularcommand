@@ -14,7 +14,6 @@
   "files": [
     "dist/**/*"
   ],
-  "main": "index.js",
   "scripts": {
     "build": "tsc",
     "prepublish": "npm run build"
