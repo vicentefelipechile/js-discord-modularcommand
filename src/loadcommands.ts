@@ -8,7 +8,7 @@
  * Imports
  */
 
-import { RegisteredCommand } from "./modularcommand";
+import { CommandData } from "./modularcommand";
 
 /**
  * @param commandsArray For storing the loaded commands
@@ -34,7 +34,7 @@ import { RegisteredCommand } from "./modularcommand";
  * }
  */
 
-function LoadCommands(commandsArray: Object[], command: RegisteredCommand | RegisteredCommand[]): void {
+function LoadCommands(commandsArray: Object[], command: CommandData | CommandData[]): void {
     const commands = Array.isArray(command) ? command : [command];
 
     for (const cmd of commands) {

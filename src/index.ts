@@ -1,5 +1,5 @@
 import { LOCALE_DELAY, LOCALE_ERROR, LOCALE_FORBIDDEN, LOCALE_NSFW, FormatSecondsLocale } from "./locales";
-import { ModularCommand, ModularButton, RegisterCommand, RegisteredCommand } from "./modularcommand";
+import { ModularCommand, ModularButton, RegisterCommand, CommandData } from "./modularcommand";
 import ModularModal from "./modularmodal";
 import LoadCommands from "./loadcommands";
 
@@ -7,7 +7,7 @@ export default ModularCommand;
 export { ModularCommand };
 export { ModularButton };
 export { ModularModal };
-export { RegisteredCommand };
+export { CommandData };
 export { RegisterCommand };
 export { FormatSecondsLocale };
 export { LoadCommands };

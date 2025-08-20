@@ -74,7 +74,7 @@ type PermissionCheckFunction = (params: { interaction: ChatInputCommandInteracti
  * const cmd = cmds[0];
  * console.log(cmd.execute); // [Function: execute]
  */
-type RegisteredCommand = {
+type CommandData = {
     data: SlashCommandBuilder;
     execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
     componentExecute?: (interaction: MessageComponentInteraction) => Promise<void>;
@@ -347,9 +347,9 @@ class ModularCommand {
 /**
  * Registers an array of modular commands.
  * @param {ModularCommand[]} commands An array of ModularCommand instances.
- * @returns {RegisteredCommand[]} An array of command data objects ready for Discord.js client.
+ * @returns {CommandData[]} An array of command data objects ready for Discord.js client.
  */
-const RegisterCommand = (commands: ModularCommand[]): RegisteredCommand[] => {
+const RegisterCommand = (commands: ModularCommand[]): CommandData[] => {
     return commands.map(command => {
         const commandBuilder = new SlashCommandBuilder()
             .setName(command.name)
@@ -452,7 +452,12 @@ const RegisterCommand = (commands: ModularCommand[]): RegisteredCommand[] => {
                 : Locale.EnglishUS;
             const localeTable = command.localizationPhrases;
 
-            const customId = (interaction as any).customId;
+            // If the value Locale.EnglishUS doesn't exist, throw an error
+            if (!localeTable || !localeTable[Locale.EnglishUS]) {
+                throw new Error(`Missing localization for EnglishUS in command ${command.name}`);
+            }
+
+            const customId: string = (interaction as any).customId;
             if (customId && command.customIdHandlers[customId]) {
                 await command.customIdHandlers[customId]({
                     interaction,
@@ -501,6 +506,11 @@ const RegisterCommand = (commands: ModularCommand[]): RegisteredCommand[] => {
                 : Locale.EnglishUS;
             const localeTable = command.localizationPhrases;
 
+            // If the value Locale.EnglishUS doesn't exist, throw an error
+            if (!localeTable || !localeTable[Locale.EnglishUS]) {
+                throw new Error(`Missing localization for EnglishUS in command ${command.name}`);
+            }
+
             await modalObject.execute({
                 interaction,
                 args,
@@ -543,5 +553,5 @@ export {
     RegisterCommand,
     ModularCommand,
     ModularButton,
-    RegisteredCommand,
+    CommandData,
 };
