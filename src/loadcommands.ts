@@ -34,7 +34,7 @@ import { CommandData } from "./modularcommand";
  * }
  */
 
-function LoadCommands(commandsArray: Object[], command: CommandData | CommandData[]): void {
+function LoadCommand(commandsArray: Object[], command: CommandData | CommandData[]): void {
     const commands = Array.isArray(command) ? command : [command];
 
     for (const cmd of commands) {
@@ -47,4 +47,4 @@ function LoadCommands(commandsArray: Object[], command: CommandData | CommandDat
  * Exports
  */
 
-export default LoadCommands;
+export default LoadCommand;
