@@ -14,10 +14,7 @@ import {
     ChatInputCommandInteraction,
     ModalSubmitInteraction,
     SlashCommandBuilder,
-    ActionRowBuilder,
-    TextInputBuilder,
     ButtonBuilder,
-    ModalBuilder,
     Locale,
     MessageFlags,
     Message,
@@ -28,10 +25,11 @@ import {
     GuildMember,
     LocalizationMap,
     APIApplicationCommandOptionChoice,
-    TextInputStyle,
 } from 'discord.js';
 
-import { LOCALE_FORBIDDEN, LOCALE_DELAY, LOCALE_ERROR, LOCALE_NSFW } from './locales.js';
+import { LOCALE_FORBIDDEN, LOCALE_DELAY, LOCALE_NSFW } from './locales.js';
+import { FormatSecondsLocale } from './locales.js';
+import ModularModal from './modularmodal.js';
 
 
 /**
@@ -113,6 +111,8 @@ const ALLOWED_OPTION_TYPE = [
     ApplicationCommandOptionType.Channel,
 ];
 
+const COOLDOWNS_MAP = new Map<string, Map<string, number>>();
+
 
 /**
  * @class ModularButton
@@ -151,82 +151,6 @@ class ModularButton {
     }
 }
 
-
-/**
- * @class ModularModal
- * @description Represents a modular modal that can be registered with Discord.js.
- * It allows for dynamic modal creation and execution.
- */
-class ModularModal {
-    public modalObject: ModalBuilder;
-    public customId: string;
-    public modalId: string;
-    public modalInputs: Map<string, TextInputBuilder>;
-    public command: ModularCommand;
-    public execute: ModalExecuteFunction = async () => { };
-
-    /**
-     * Creates a new modal for the command.
-     * @param {string} modalId The ID for the modal.
-     * @param {ModularCommand} command The command that this modal belongs to.
-     */
-    constructor(modalId: string, command: ModularCommand) {
-        const customModalId = `${command.name}_${modalId}`;
-
-        this.modalObject = new ModalBuilder();
-        this.modalObject.setCustomId(customModalId);
-        this.customId = customModalId;
-        this.modalId = modalId;
-
-        this.modalInputs = new Map();
-        this.command = command;
-    }
-
-    /**
-     * Sets the execute function for the modal.
-     * @param {ModalExecuteFunction} executeFunction The function to execute.
-     * @returns {ModularModal} The modal instance for chaining.
-     */
-    setExecute(executeFunction: ModalExecuteFunction): this {
-        this.execute = executeFunction;
-        return this;
-    }
-
-    /**
-     * Creates a new text input for the modal.
-     * @param {string} id The ID for the text input.
-     * @param {TextInputStyle} style The style of the text input.
-     * @returns {TextInputBuilder} The created text input instance.
-     */
-    newTextInput(id: string, style: TextInputStyle): TextInputBuilder {
-        const textInput = new TextInputBuilder();
-        textInput.setCustomId(id);
-        textInput.setStyle(style);
-        this.modalInputs.set(id, textInput);
-
-        this.modalObject.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(textInput));
-        return textInput;
-    }
-
-    /**
-     * Builds the modal object.
-     * @param {Record<string, any>} locale The localization object for the modal.
-     * @return {ModalBuilder} The built modal object.
-     */
-    build(locale: Record<string, any>): ModalBuilder {
-        const selfModal = this.modalObject;
-        const commandName = this.command.name;
-
-        selfModal.setTitle(locale[`${commandName}.${this.modalId}.title`]);
-
-        this.modalInputs.forEach((input, id) => {
-            input.setLabel(locale[`${commandName}.${id}.label`]);
-            input.setPlaceholder(locale[`${commandName}.${id}.placeholder`]);
-        });
-
-        return selfModal;
-    }
-}
 
 /**
  * @description Represents a modular command that can be registered with Discord.js.
@@ -432,6 +356,8 @@ const RegisterCommand = (commands: ModularCommand[]): RegisteredCommand[] => {
             .setDescription(command.description)
             .setDescriptionLocalizations(command.descriptionLocalizations || null);
 
+        COOLDOWNS_MAP.set(command.name, new Map<string, number>());
+
         const options: Record<string, ApplicationCommandOptionType> = {};
 
         command.options.forEach(opt => {
@@ -474,20 +400,36 @@ const RegisterCommand = (commands: ModularCommand[]): RegisteredCommand[] => {
         });
 
         const executeBuilder = async (interaction: ChatInputCommandInteraction): Promise<void> => {
+            // User has permissions
             if (command.permissionCheck && !command.permissionCheck({interaction})) {
                 await interaction.reply({
-                    content: LOCALE_FORBIDDEN[interaction.locale] || LOCALE_FORBIDDEN[Locale.EnglishUS],
+                    content: LOCALE_FORBIDDEN[interaction.locale],
                     flags: MessageFlags.Ephemeral,
                 });
                 return;
             }
 
+            // User is using a NSFW command in a non-NSFW channel
             if (command.isNSFW && (!interaction.channel || !('nsfw' in interaction.channel) || !interaction.channel.nsfw)) {
                 await interaction.reply({
-                    content: LOCALE_NSFW[interaction.locale] || LOCALE_NSFW[Locale.EnglishUS],
+                    content: LOCALE_NSFW[interaction.locale],
                     flags: MessageFlags.Ephemeral,
                 });
                 return;
+            }
+
+            // User is in a cooldown
+            const lastTime = COOLDOWNS_MAP.get(command.name)?.get(interaction.user.id);
+            if (lastTime) {
+                const cooldownDuration = (Date.now() / 1000) - lastTime;
+                if (cooldownDuration < command.cooldown) {
+                    await interaction.reply({
+                        content: FormatSecondsLocale(LOCALE_DELAY[interaction.locale], command.cooldown - cooldownDuration),
+                        flags: MessageFlags.Ephemeral,
+                    });
+                    return;
+                }
+                COOLDOWNS_MAP.get(command.name)?.set(interaction.user.id, Date.now() / 1000);
             }
 
             const args: Record<string, any> = {};
@@ -601,9 +543,4 @@ export {
     RegisterCommand,
     ModularCommand,
     ModularButton,
-    ModularModal,
-    LOCALE_FORBIDDEN,
-    LOCALE_DELAY,
-    LOCALE_NSFW,
-    LOCALE_ERROR,
 };
