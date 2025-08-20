@@ -25,6 +25,8 @@ import {
     GuildMember,
     LocalizationMap,
     APIApplicationCommandOptionChoice,
+    CommandInteraction,
+    ButtonInteraction,
 } from 'discord.js';
 
 import { LOCALE_FORBIDDEN, LOCALE_DELAY, LOCALE_NSFW } from './locales.js';
@@ -38,15 +40,21 @@ import ModularModal from './modularmodal.js';
 
 type ArgType = string | number | boolean | User | Channel | Role | GuildMember;
 
-type ExecuteFunction<T extends ChatInputCommandInteraction | MessageComponentInteraction> = (params: {
-    interaction: T;
-    args?: Record<string, ArgType>;
+type CommandExecuteFunction = (params: {
+    interaction: ChatInputCommandInteraction;
     command: ModularCommand;
     locale: Record<string, any>;
+    args?: Record<string, ArgType>;
+}) => Promise<void>;
+
+type ComponentExecuteFunction = (params: {
+    interaction: MessageComponentInteraction;
+    locale: Record<string, any>;
+    command: ModularCommand;
 }) => Promise<void>;
 
 type ButtonExecuteFunction = (params: {
-    interaction: MessageComponentInteraction;
+    interaction: ButtonInteraction;
     command: ModularCommand;
     locale: Record<string, any>;
     message: Message;
@@ -54,12 +62,12 @@ type ButtonExecuteFunction = (params: {
 
 type ModalExecuteFunction = (params: {
     interaction: ModalSubmitInteraction;
-    args: Record<string, string>;
     command: ModularCommand;
     locale: Record<string, any>;
+    args: Record<string, string>;
 }) => Promise<void>;
 
-type PermissionCheckFunction = (params: { interaction: ChatInputCommandInteraction }) => boolean | Promise<boolean>;
+type PermissionCheckFunction = (params: { interaction: CommandInteraction }) => boolean | Promise<boolean>;
 
 /**
  * @description Registered Command as object to be used outside the modular command system.
@@ -79,7 +87,7 @@ type CommandData = {
     execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
     componentExecute?: (interaction: MessageComponentInteraction) => Promise<void>;
     modalExecute?: (interaction: ModalSubmitInteraction) => Promise<void>;
-    buttonExecute?: (interaction: MessageComponentInteraction) => Promise<void>;
+    buttonExecute?: (interaction: ButtonInteraction) => Promise<void>;
     cooldown: number;
 };
 
@@ -175,12 +183,13 @@ class ModularButton {
 class ModularCommand {
     public name: string;
     public description: string;
-    public execute: ExecuteFunction<ChatInputCommandInteraction>;
-    public componentExecute?: ExecuteFunction<MessageComponentInteraction>;
+    public execute: CommandExecuteFunction;
+    public buttonExecute?: ButtonExecuteFunction;
+    public componentExecute?: ComponentExecuteFunction;
     public modalExecute?: ModalExecuteFunction;
     public options: CommandOption[];
     public optionsLocalizations: Record<string, Record<Locale, string>>;
-    public customIdHandlers: Record<string, ExecuteFunction<ChatInputCommandInteraction>>;
+    public customIdHandlers: Record<string, CommandExecuteFunction>;
     public cooldown: number;
     public modals: Map<string, ModularModal>;
     public buttons: Map<string, ModularButton>;
@@ -245,10 +254,10 @@ class ModularCommand {
 
     /**
      * Sets the execute function for the command.
-     * @param {ExecuteFunction<CommandInteraction>} executeFunction The function to execute.
+     * @param {CommandExecuteFunction} executeFunction The function to execute.
      * @returns {ModularCommand} The command instance for chaining.
      */
-    setExecute(executeFunction: ExecuteFunction<ChatInputCommandInteraction>): this {
+    setExecute(executeFunction: CommandExecuteFunction): this {
         this.execute = executeFunction;
         return this;
     }
@@ -256,10 +265,10 @@ class ModularCommand {
     /**
      * Sets the component execute function for the command.
      * @param {string} componentId The base ID for the components.
-     * @param {ExecuteFunction<MessageComponentInteraction>} executeFunction The function to execute for component interactions.
+     * @param {ComponentExecuteFunction} executeFunction The function to execute for component interactions.
      * @returns {ModularCommand} The command instance for chaining.
      */
-    setComponentExecute(componentId: string, executeFunction: ExecuteFunction<MessageComponentInteraction>): this {
+    setComponentExecute(componentId: string, executeFunction: ComponentExecuteFunction): this {
         this.componentId = componentId;
         this.componentExecute = executeFunction;
         return this;
@@ -311,10 +320,10 @@ class ModularCommand {
     /**
      * Adds a custom ID handler for the command.
      * @param {string} customId The custom ID to match.
-     * @param {ExecuteFunction<CommandInteraction<CacheType>>} handlerFunction The function to execute when the custom ID matches.
+     * @param {CommandInteraction<CacheType>} handlerFunction The function to execute when the custom ID matches.
      * @returns {ModularCommand} The command instance for chaining.
      */
-    addCustomIDHandler(customId: string, handlerFunction: ExecuteFunction<ChatInputCommandInteraction>): this {
+    addCustomIDHandler(customId: string, handlerFunction: CommandExecuteFunction): this {
         this.customIdHandlers[customId] = handlerFunction;
         return this;
     }
@@ -519,7 +528,7 @@ const RegisterCommand = (commands: ModularCommand[]): CommandData[] => {
             });
         };
 
-        const buttonExecuteBuilder = async (interaction: MessageComponentInteraction): Promise<void> => {
+        const buttonExecuteBuilder = async (interaction: ButtonInteraction): Promise<void> => {
             const buttonId = interaction.customId;
             const buttonObject = command.buttons.get(buttonId);
             if (!buttonObject) return;
