@@ -543,4 +543,5 @@ export {
     RegisterCommand,
     ModularCommand,
     ModularButton,
+    RegisteredCommand,
 };
