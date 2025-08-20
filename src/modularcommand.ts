@@ -31,174 +31,8 @@ import {
     TextInputStyle,
 } from 'discord.js';
 
+import { LOCALE_FORBIDDEN, LOCALE_DELAY, LOCALE_ERROR, LOCALE_NSFW } from './locales.js';
 
-/**
- * Localization Phrases
- */
-
-/**
- * @description Localization phrases for various commands.
- * @example
- * const example = LOCALE_FORBIDDEN[Locale.EnglishUS];
- * console.log(example); // 'You do not have permission to use this command.'
- */
-const LOCALE_FORBIDDEN: Record<Locale, string> = {
-    [Locale.SpanishLATAM]: 'No tienes permiso para usar este comando.',
-    [Locale.EnglishUS]: 'You do not have permission to use this command.',
-    [Locale.EnglishGB]: 'I say, it appears you lack the proper authorisation to utilise this command, old bean.',
-    [Locale.SpanishES]: 'Ostias chaval, tio parece que no vais a poder usar este comando madre mia willy, que barbaridad.',
-    [Locale.PortugueseBR]: 'Você não tem permissão para usar este comando.',
-    [Locale.French]: 'Vous n\'avez pas la permission d\'utiliser cette commande.',
-    [Locale.German]: 'Du hast keine Berechtigung, diesen Befehl zu verwenden.',
-    [Locale.Italian]: 'Non hai il permesso di usare questo comando.',
-    [Locale.Russian]: 'У вас нет разрешения на использование этой команды.',
-    [Locale.ChineseCN]: '您没有权限使用此命令。',
-    [Locale.ChineseTW]: '您沒有權限使用此命令。',
-    [Locale.Japanese]: 'このコマンドを使用する権限がありません。',
-    [Locale.Korean]: '이 명령을 사용할 권한이 없습니다.',
-    [Locale.Bulgarian]: 'Нямате разрешение да използвате тази команда.',
-    [Locale.Czech]: 'Nemáte oprávnění k použití tohoto příkazu.',
-    [Locale.Danish]: 'Du har ikke tilladelse til at bruge denne kommando.',
-    [Locale.Dutch]: 'Je hebt geen toestemming om deze opdracht te gebruiken.',
-    [Locale.Finnish]: 'Sinulla ei ole lupaa käyttää tätä komentoa.',
-    [Locale.Hungarian]: 'Nincs jogosultságod ehhez a parancshoz.',
-    [Locale.Norwegian]: 'Du har ikke tillatelse til å bruke denne kommandoen.',
-    [Locale.Polish]: 'Nie masz uprawnień do używania tej komendy.',
-    [Locale.Romanian]: 'Nu ai permisiunea de a folosi acest comandă.',
-    [Locale.Swedish]: 'Du har inte behörighet att använda det här kommandot.',
-    [Locale.Turkish]: 'Bu komutu kullanma izniniz yok.',
-    [Locale.Ukrainian]: 'У вас немає дозволу на використання цієї команди.',
-    [Locale.Hindi]: 'आपको इस कमांड का उपयोग करने की अनुमति नहीं है।',
-    [Locale.Indonesian]: 'Anda tidak memiliki izin untuk menggunakan perintah ini.',
-    [Locale.Greek]: 'Δεν έχετε άδεια να χρησιμοποιήσετε αυτήν την εντολή.',
-    [Locale.Croatian]: 'Nemate dopuštenje za korištenje ove naredbe.',
-    [Locale.Lithuanian]: 'Jūs neturite teisės naudoti šio komandos.',
-    [Locale.Thai]: 'คุณไม่มีสิทธิ์ใช้คำสั่งนี้.',
-    [Locale.Vietnamese]: 'Bạn không có quyền sử dụng lệnh này.'
-};
-
-/**
- * @description Localization phrases for NSFW commands.
- * @example
- * const example = LOCALE_NSFW[Locale.EnglishUS];
- * console.log(example); // 'This command can only be used in NSFW channels.'
- */
-const LOCALE_NSFW: Record<Locale, string> = {
-    [Locale.SpanishLATAM]: 'Este comando solo puede ser usado en canales NSFW.',
-    [Locale.EnglishUS]: 'This command can only be used in NSFW channels.',
-    [Locale.EnglishGB]: 'I do declare, this command is exclusively for channels of a... risqué nature. little bit of cheeky fun, eh?',
-    [Locale.SpanishES]: '¡Ostias, chaval! Que este comando es solo para los canales más guarros, ¿vale? No me seas meapilas.',
-    [Locale.PortugueseBR]: 'Este comando só pode ser usado em canais NSFW.',
-    [Locale.French]: 'Cette commande ne peut être utilisée que dans les salons NSFW.',
-    [Locale.German]: 'Dieser Befehl kann nur in NSFW-Kanälen verwendet werden.',
-    [Locale.Italian]: 'Questo comando può essere utilizzato solo nei canali NSFW.',
-    [Locale.Russian]: 'Эту команду можно использовать только в каналах NSFW.',
-    [Locale.ChineseCN]: '此命令只能在NSFW频道中使用。',
-    [Locale.ChineseTW]: '此命令只能在 NSFW 頻道中使用。',
-    [Locale.Japanese]: 'このコマンドはNSFWチャンネルでのみ使用できます。',
-    [Locale.Korean]: '이 명령어는 NSFW 채널에서만 사용할 수 있습니다.',
-    [Locale.Bulgarian]: 'Тази команда може да се използва само в NSFW канали.',
-    [Locale.Czech]: 'Tento příkaz lze použít pouze v kanálech NSFW.',
-    [Locale.Danish]: 'Denne kommando kan kun bruges i NSFW-kanaler.',
-    [Locale.Dutch]: 'Deze opdracht kan alleen worden gebruikt in NSFW-kanalen.',
-    [Locale.Finnish]: 'Tätä komentoa voi käyttää vain NSFW-kanavilla.',
-    [Locale.Hungarian]: 'Ez a parancs csak NSFW csatornákon használható.',
-    [Locale.Norwegian]: 'Denne kommandoen kan bare brukes i NSFW-kanaler.',
-    [Locale.Polish]: 'Ta komenda może być używana tylko na kanałach NSFW.',
-    [Locale.Romanian]: 'Această comandă poate fi utilizată numai în canalele NSFW.',
-    [Locale.Swedish]: 'Det här kommandot kan endast användas i NSFW-kanaler.',
-    [Locale.Turkish]: 'Bu komut yalnızca NSFW kanallarında kullanılabilir.',
-    [Locale.Ukrainian]: 'Цю команду можна використовувати лише в каналах NSFW.',
-    [Locale.Hindi]: 'यह कमांड केवल NSFW चैनलों में ही उपयोग की जा सकती है।',
-    [Locale.Indonesian]: 'Perintah ini hanya dapat digunakan di saluran NSFW.',
-    [Locale.Greek]: 'Αυτή η εντολή μπορεί να χρησιμοποιηθεί μόνο σε κανάλια NSFW.',
-    [Locale.Croatian]: 'Ova se naredba može koristiti samo u NSFW kanalima.',
-    [Locale.Lithuanian]: 'Ši komanda gali būti naudojama tik NSFW kanaluose.',
-    [Locale.Thai]: 'คำสั่งนี้สามารถใช้ได้เฉพาะในช่องทาง NSFW เท่านั้น.',
-    [Locale.Vietnamese]: 'Lệnh này chỉ có thể được sử dụng trong các kênh NSFW.'
-};
-
-/**
- * @description Localization phrases for delay commands.
- * @example
- * const example = LOCALE_DELAY[Locale.EnglishUS];
- * const secondsPluralRegEx = new RegExp('{plural\\|([^}]+)}', 'g');
- * const seconds = 5;
- * const formattedPhrase = example
- *      .replace('{seconds}', seconds.toString())
- *      .replace(secondsPluralRegEx, seconds === 1 ? '' : '$1');
- *
- * console.log(formattedPhrase); // 'You must wait 5 seconds before using this command again.'
- */
-const LOCALE_DELAY: Record<Locale, string> = {
-    [Locale.SpanishLATAM]: 'Debes esperar {seconds} segundo{plural|s} antes de utilizar este comando denuevo.',
-    [Locale.EnglishUS]: 'You must wait {seconds} second{plural|s} before using this command again.',
-    [Locale.EnglishGB]: 'I do declare, you must wait {seconds} second{plural|s} before using this command again.',
-    [Locale.SpanishES]: '¡Ostias, chaval! Debes esperar {seconds} segundo{plural|s} antes de utilizar este comando denuevo.',
-    [Locale.PortugueseBR]: 'Você deve esperar {seconds} segundo{plural|s} antes de usar este comando novamente.',
-    [Locale.French]: 'Vous devez attendre {seconds} seconde{plural|s} avant d\'utiliser cette commande à nouveau.',
-    [Locale.German]: 'Sie müssen {seconds} Sekunde{plural|n} warten, bevor Sie diesen Befehl erneut verwenden können.',
-    [Locale.Italian]: 'Devi aspettare {seconds} secondo{plural|i} prima di utilizzare di nuovo questo comando.',
-    [Locale.Russian]: 'Вы должны подождать {seconds} секунду{plural|ы} перед повторным использованием этой команды.',
-    [Locale.ChineseCN]: '您必须等待 {seconds} 秒钟{plural|s}才能再次使用此命令。',
-    [Locale.ChineseTW]: '您必須等待 {seconds} 秒鐘{plural|s}才能再次使用此命令。',
-    [Locale.Japanese]: 'このコマンドを再度使用するには、{seconds} 秒待つ必要があります。',
-    [Locale.Korean]: '이 명령어를 다시 사용하려면 {seconds} 초 기다려야 합니다.',
-    [Locale.Bulgarian]: 'Трябва да изчакате {seconds} секунда{plural|и}, преди да използвате тази команда отново.',
-    [Locale.Czech]: 'Musíte počkat {seconds} sekundu{plural|y}, než znovu použijete tento příkaz.',
-    [Locale.Danish]: 'Du skal vente {seconds} sekund{plural|er} før du kan bruge denne kommando igen.',
-    [Locale.Dutch]: 'Je moet {seconds} seconde{plural|n} wachten voordat je dit commando opnieuw kunt gebruiken.',
-    [Locale.Finnish]: 'Sinun on odotettava {seconds} sekuntia ennen kuin voit käyttää tätä komentoa uudelleen.',
-    [Locale.Hungarian]: 'Várnod kell {seconds} másodpercet, mielőtt újra használhatod ezt a parancsot.',
-    [Locale.Norwegian]: 'Du må vente {seconds} sekund{plural|er} før du kan bruke denne kommandoen igjen.',
-    [Locale.Polish]: 'Musisz poczekać {seconds} sekund{plural|y}, zanim ponownie użyjesz tego polecenia.',
-    [Locale.Romanian]: 'Trebuie să aștepți {seconds} secundă{plural|e} înainte de a folosi din nou acest comandă.',
-    [Locale.Swedish]: 'Du måste vänta {seconds} sekund{plural|er} innan du kan använda det här kommandot igen.',
-    [Locale.Turkish]: 'Bu komutu tekrar kullanmadan önce {seconds} saniye beklemelisiniz.',
-    [Locale.Ukrainian]: 'Вам потрібно почекати {seconds} секунду{plural|и}, перш ніж знову використовувати цю команду.',
-    [Locale.Hindi]: 'आपको इस कमांड का उपयोग करने से पहले {seconds} सेकंड{plural|s} इंतजार करना होगा।',
-    [Locale.Indonesian]: 'Anda harus menunggu {seconds} detik{plural|s} sebelum menggunakan perintah ini lagi.',
-    [Locale.Greek]: 'Πρέπει να περιμένετε {seconds} δευτερόλεπτο{plural|α} πριν χρησιμοποιήσετε ξανά αυτήν την εντολή.',
-    [Locale.Croatian]: 'Morate pričekati {seconds} sekundu{plural|e} prije nego što ponovno upotrijebite ovu naredbu.',
-    [Locale.Lithuanian]: 'Prieš vėl naudodamiesi šiuo komandu, turite palaukti {seconds} sekundę{plural|es}.',
-    [Locale.Thai]: 'คุณต้องรอ {seconds} วินาที{plural|s} ก่อนที่จะใช้คำสั่งนี้อีกครั้ง',
-    [Locale.Vietnamese]: 'Bạn phải đợi {seconds} giây{plural|s} trước khi sử dụng lại lệnh này.'
-};
-
-const LOCALE_ERROR: Record<Locale, string> = {
-    [Locale.SpanishLATAM]: 'Ocurrió un error al procesar tu solicitud.',
-    [Locale.EnglishUS]: 'An error occurred while processing your request.',
-    [Locale.EnglishGB]: 'I do declare, an error occurred while processing your request.',
-    [Locale.SpanishES]: 'Pero que me estás contando, willy, ocurrió un error al procesar tu solicitud.',
-    [Locale.PortugueseBR]: 'Ocorreu um erro ao processar sua solicitação.',
-    [Locale.French]: 'Une erreur est survenue lors du traitement de votre demande.',
-    [Locale.German]: 'Bei der Verarbeitung Ihrer Anfrage ist ein Fehler aufgetreten.',
-    [Locale.Italian]: 'Si è verificato un errore durante l\'elaborazione della tua richiesta.',
-    [Locale.Russian]: 'Произошла ошибка при обработке вашего запроса.',
-    [Locale.ChineseCN]: '处理您的请求时发生错误。',
-    [Locale.ChineseTW]: '處理您的請求時發生錯誤。',
-    [Locale.Japanese]: 'リクエストの処理中にエラーが発生しました。',
-    [Locale.Korean]: '요청을 처리하는 동안 오류가 발생했습니다.',
-    [Locale.Bulgarian]: 'При обработката на заявката ви възникна грешка.',
-    [Locale.Czech]: 'Při zpracování vaší žádosti došlo k chybě.',
-    [Locale.Danish]: 'Der opstod en fejl under behandlingen af din anmodning.',
-    [Locale.Dutch]: 'Er is een fout opgetreden bij het verwerken van uw verzoek.',
-    [Locale.Finnish]: 'Pyyntösi käsittelyssä tapahtui virhe.',
-    [Locale.Hungarian]: 'A kérésed feldolgozása során hiba lépett fel.',
-    [Locale.Norwegian]: 'Det oppstod en feil under behandling av forespørselen din.',
-    [Locale.Polish]: 'Wystąpił błąd podczas przetwarzania twojej prośby.',
-    [Locale.Romanian]: 'A apărut o eroare în timpul procesării cererii tale.',
-    [Locale.Swedish]: 'Ett fel inträffade vid behandling av din begäran.',
-    [Locale.Turkish]: 'Talebiniz işlenirken bir hata oluştu.',
-    [Locale.Ukrainian]: 'Під час обробки вашого запиту сталася помилка.',
-    [Locale.Hindi]: 'आपके अनुरोध को संसाधित करते समय एक त्रुटि हुई।',
-    [Locale.Indonesian]: 'Terjadi kesalahan saat memproses permintaan Anda.',
-    [Locale.Greek]: 'Συνέβη σφάλμα κατά την επεξεργασία του αιτήματός σας.',
-    [Locale.Croatian]: 'Došlo je do pogreške prilikom obrade vašeg zahtjeva.',
-    [Locale.Lithuanian]: 'Apdorojant jūsų užklausą įvyko klaida.',
-    [Locale.Thai]: 'เกิดข้อผิดพลาดระหว่างการประมวลผลคำขอของคุณ',
-    [Locale.Vietnamese]: 'Đã xảy ra lỗi trong quá trình xử lý yêu cầu của bạn.'
-};
 
 /**
  * Types
@@ -227,35 +61,43 @@ type ModalExecuteFunction = (params: {
     locale: Record<string, any>;
 }) => Promise<void>;
 
-type PermissionCheckFunction = (interaction: ChatInputCommandInteraction) => boolean;
+type PermissionCheckFunction = (params: { interaction: ChatInputCommandInteraction }) => boolean | Promise<boolean>;
 
 /**
- * Interface
+ * @description Registered Command as object to be used outside the modular command system.
+ * @example
+ * const PingCommand = new ModularCommand('ping');
+ *
+ * PingCommand.setExecute(({interaction}) => {
+ *     interaction.reply('Pong!');
+ * });
+ *
+ * const cmds = RegisterCommand([PingCommand])
+ * const cmd = cmds[0];
+ * console.log(cmd.execute); // [Function: execute]
  */
-
-interface ModularCommandOptions {
-    name: string;
-    description?: string;
-    execute?: ExecuteFunction<ChatInputCommandInteraction>;
-    componentExecute?: ExecuteFunction<MessageComponentInteraction>;
-    modalExecute?: ModalExecuteFunction;
-}
-
-interface CommandOption {
-    name: string;
-    type: ApplicationCommandOptionType;
-    description: Record<Locale, string> | string;
-    required?: boolean;
-    choices?: APIApplicationCommandOptionChoice[];
-}
-
-interface RegisteredCommand {
+type RegisteredCommand = {
     data: SlashCommandBuilder;
     execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
     componentExecute?: (interaction: MessageComponentInteraction) => Promise<void>;
     modalExecute?: (interaction: ModalSubmitInteraction) => Promise<void>;
     buttonExecute?: (interaction: MessageComponentInteraction) => Promise<void>;
     cooldown: number;
+};
+
+/**
+ * Interface
+ */
+
+/**
+ * @description Represents a command option for a modular command.
+ */
+interface CommandOption {
+    name: string;
+    type: ApplicationCommandOptionType;
+    description: Record<Locale, string> | string;
+    required?: boolean;
+    choices?: APIApplicationCommandOptionChoice[];
 }
 
 /**
@@ -317,6 +159,7 @@ class ModularButton {
  */
 class ModularModal {
     public modalObject: ModalBuilder;
+    public customId: string;
     public modalId: string;
     public modalInputs: Map<string, TextInputBuilder>;
     public command: ModularCommand;
@@ -328,8 +171,11 @@ class ModularModal {
      * @param {ModularCommand} command The command that this modal belongs to.
      */
     constructor(modalId: string, command: ModularCommand) {
+        const customModalId = `${command.name}_${modalId}`;
+
         this.modalObject = new ModalBuilder();
-        this.modalObject.setCustomId(modalId);
+        this.modalObject.setCustomId(customModalId);
+        this.customId = customModalId;
         this.modalId = modalId;
 
         this.modalInputs = new Map();
@@ -383,9 +229,24 @@ class ModularModal {
 }
 
 /**
- * @class ModularCommand
  * @description Represents a modular command that can be registered with Discord.js.
  * It allows for dynamic command creation and execution.
+ * @example
+ * const { ModularCommand, RegisterCommand } = require('js-discord-modularcommand');
+ * 
+ * const PingCommand = new ModularCommand('ping');
+ * PingCommand.setDescription('Sends a ping message.');
+ * PingCommand.setExecute(async ({interaction}) => {
+ *     await interaction.reply('Pong!');
+ * });
+ *
+ * PingCommand.setPermissionCheck(({ interaction }) => {
+ *     return interaction.member.permissions.has(PermissionFlagsBits.Administrator);
+ * });
+ *
+ * module.exports = RegisterCommand([
+ *     PingCommand
+ * ]);
  */
 class ModularCommand {
     public name: string;
@@ -406,12 +267,12 @@ class ModularCommand {
     public permissionCheck?: PermissionCheckFunction;
     public componentId?: string;
 
-    constructor({ name, description, execute, componentExecute, modalExecute }: ModularCommandOptions) {
+    constructor(name: string) {
         this.name = name;
-        this.description = description || '';
-        this.execute = execute || (async () => { });
-        this.componentExecute = componentExecute;
-        this.modalExecute = modalExecute;
+        this.description = '';
+        this.execute = async () => {};
+        this.componentExecute = undefined;
+        this.modalExecute = undefined;
         this.options = [];
         this.optionsLocalizations = {};
         this.customIdHandlers = {};
@@ -481,30 +342,6 @@ class ModularCommand {
     }
 
     /**
-     * Creates a new modal for the command.
-     * @param {string} modalId The ID for the modal.
-     * @returns {ModularModal} The created modal instance.
-     */
-    newModal(modalId: string): ModularModal {
-        const modal = new ModularModal(modalId, this);
-        this.modals.set(modalId, modal);
-        return modal;
-    }
-
-    /**
-     * Creates a new button for the command.
-     * @param {string} customId The custom ID for the button.
-     * @param {ButtonStyle} style The style of the button.
-     * @return {ModularButton} The created button instance.
-     */
-    newButton(customId: string, style: ButtonStyle): ModularButton {
-        const button = new ModularButton(customId, style);
-        this.buttons.set(customId, button);
-        this.buttonsArray.push(button);
-        return button;
-    }
-
-    /**
      * Set the minimun permissions required to execute the command.
      * @param {PermissionCheckFunction} permissionCheckFunction The function to check permissions.
      * @returns {ModularCommand} The command instance for chaining.
@@ -556,6 +393,30 @@ class ModularCommand {
     addCustomIDHandler(customId: string, handlerFunction: ExecuteFunction<ChatInputCommandInteraction>): this {
         this.customIdHandlers[customId] = handlerFunction;
         return this;
+    }
+
+    /**
+     * Creates a new modal for the command.
+     * @param {string} modalId The ID for the modal.
+     * @returns {ModularModal} The created modal instance.
+     */
+    addModal(modalId: string): ModularModal {
+        const modal = new ModularModal(modalId, this);
+        this.modals.set(modalId, modal);
+        return modal;
+    }
+
+    /**
+     * Creates a new button for the command.
+     * @param {string} customId The custom ID for the button.
+     * @param {ButtonStyle} style The style of the button.
+     * @return {ModularButton} The created button instance.
+     */
+    addButton(customId: string, style: ButtonStyle): ModularButton {
+        const button = new ModularButton(customId, style);
+        this.buttons.set(customId, button);
+        this.buttonsArray.push(button);
+        return button;
     }
 }
 
@@ -613,7 +474,7 @@ const RegisterCommand = (commands: ModularCommand[]): RegisteredCommand[] => {
         });
 
         const executeBuilder = async (interaction: ChatInputCommandInteraction): Promise<void> => {
-            if (command.permissionCheck && !command.permissionCheck(interaction)) {
+            if (command.permissionCheck && !command.permissionCheck({interaction})) {
                 await interaction.reply({
                     content: LOCALE_FORBIDDEN[interaction.locale] || LOCALE_FORBIDDEN[Locale.EnglishUS],
                     flags: MessageFlags.Ephemeral,
