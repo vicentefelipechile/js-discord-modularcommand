@@ -9,7 +9,7 @@
  */
 
 import {
-    ApplicationCommandOptionType,
+    ApplicationCommandOptionType as OptionType,
     MessageComponentInteraction,
     ChatInputCommandInteraction,
     ModalSubmitInteraction,
@@ -30,7 +30,6 @@ import {
 } from 'discord.js';
 
 import { LOCALE_FORBIDDEN, LOCALE_DELAY, LOCALE_NSFW } from './locales.js';
-import { FormatSecondsLocale } from './locales.js';
 import ModularModal from './modularmodal.js';
 
 
@@ -49,8 +48,8 @@ type CommandExecuteFunction = (params: {
 
 type ComponentExecuteFunction = (params: {
     interaction: MessageComponentInteraction;
-    locale: Record<string, any>;
     command: ModularCommand;
+    locale: Record<string, any>;
 }) => Promise<void>;
 
 type ButtonExecuteFunction = (params: {
@@ -100,7 +99,7 @@ type CommandData = {
  */
 interface CommandOption {
     name: string;
-    type: ApplicationCommandOptionType;
+    type: OptionType;
     description: Record<Locale, string> | string;
     required?: boolean;
     choices?: APIApplicationCommandOptionChoice[];
@@ -111,12 +110,12 @@ interface CommandOption {
  */
 
 const ALLOWED_OPTION_TYPE = [
-    ApplicationCommandOptionType.String,
-    ApplicationCommandOptionType.Boolean,
-    ApplicationCommandOptionType.Integer,
-    ApplicationCommandOptionType.Number,
-    ApplicationCommandOptionType.User,
-    ApplicationCommandOptionType.Channel,
+    OptionType.String,
+    OptionType.Boolean,
+    OptionType.Integer,
+    OptionType.Number,
+    OptionType.User,
+    OptionType.Channel,
 ];
 
 const COOLDOWNS_MAP = new Map<string, Map<string, number>>();
@@ -367,7 +366,7 @@ const RegisterCommand = (commands: ModularCommand[]): CommandData[] => {
 
         COOLDOWNS_MAP.set(command.name, new Map<string, number>());
 
-        const options: Record<string, ApplicationCommandOptionType> = {};
+        const options: Record<string, OptionType> = {};
 
         command.options.forEach(opt => {
             const description =
@@ -397,12 +396,12 @@ const RegisterCommand = (commands: ModularCommand[]): CommandData[] => {
             };
 
             switch (opt.type) {
-                case ApplicationCommandOptionType.String: commandBuilder.addStringOption(optionBuilder); break;
-                case ApplicationCommandOptionType.Boolean: commandBuilder.addBooleanOption(optionBuilder); break;
-                case ApplicationCommandOptionType.Integer: commandBuilder.addIntegerOption(optionBuilder); break;
-                case ApplicationCommandOptionType.Number: commandBuilder.addNumberOption(optionBuilder); break;
-                case ApplicationCommandOptionType.User: commandBuilder.addUserOption(optionBuilder); break;
-                case ApplicationCommandOptionType.Channel: commandBuilder.addChannelOption(optionBuilder); break;
+                case OptionType.String: commandBuilder.addStringOption(optionBuilder); break;
+                case OptionType.Boolean: commandBuilder.addBooleanOption(optionBuilder); break;
+                case OptionType.Integer: commandBuilder.addIntegerOption(optionBuilder); break;
+                case OptionType.Number: commandBuilder.addNumberOption(optionBuilder); break;
+                case OptionType.User: commandBuilder.addUserOption(optionBuilder); break;
+                case OptionType.Channel: commandBuilder.addChannelOption(optionBuilder); break;
                 default:
                     throw new Error(`Unsupported option type: ${opt.type}`);
             }
@@ -433,7 +432,7 @@ const RegisterCommand = (commands: ModularCommand[]): CommandData[] => {
                 const cooldownDuration = (Date.now() / 1000) - lastTime;
                 if (cooldownDuration < command.cooldown) {
                     await interaction.reply({
-                        content: FormatSecondsLocale(LOCALE_DELAY[interaction.locale], command.cooldown - cooldownDuration),
+                        content: LOCALE_DELAY[interaction.locale].formatTime(command.cooldown - cooldownDuration),
                         flags: MessageFlags.Ephemeral,
                     });
                     return;
@@ -445,12 +444,12 @@ const RegisterCommand = (commands: ModularCommand[]): CommandData[] => {
 
             for (const option of Object.keys(options)) {
                 switch (options[option]) {
-                    case ApplicationCommandOptionType.String: args[option] = interaction.options.getString(option, false); break;
-                    case ApplicationCommandOptionType.Boolean: args[option] = interaction.options.getBoolean(option, false); break;
-                    case ApplicationCommandOptionType.Integer: args[option] = interaction.options.getInteger(option, false); break;
-                    case ApplicationCommandOptionType.Number: args[option] = interaction.options.getNumber(option, false); break;
-                    case ApplicationCommandOptionType.User: args[option] = interaction.options.getUser(option, false); break;
-                    case ApplicationCommandOptionType.Channel: args[option] = interaction.options.getChannel(option, false); break;
+                    case OptionType.String: args[option] = interaction.options.getString(option, false); break;
+                    case OptionType.Boolean: args[option] = interaction.options.getBoolean(option, false); break;
+                    case OptionType.Integer: args[option] = interaction.options.getInteger(option, false); break;
+                    case OptionType.Number: args[option] = interaction.options.getNumber(option, false); break;
+                    case OptionType.User: args[option] = interaction.options.getUser(option, false); break;
+                    case OptionType.Channel: args[option] = interaction.options.getChannel(option, false); break;
                     default:
                         throw new Error(`Unsupported option type: ${options[option]}`);
                 }

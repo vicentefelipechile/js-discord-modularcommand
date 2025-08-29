@@ -1,5 +1,6 @@
 /**
  * Modular Command Example
+ * @description This is an example of a modular command using the js-discord-modularcommand library,
  * @license MIT
  */
 

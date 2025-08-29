@@ -1,138 +1,11 @@
 /**
- * @module ModularCommand Locales
+ * @module Locales
  * @description Generic localization phrases used throughout the application.
  * @license MIT
  */
 
 import { Locale } from "discord.js";
-
-/**
- * Regular expressions for time formatting
- * Used to match and replace time-related placeholders in localization strings.
- */
-
-/**
- * @name SECONDS
- * @description Matches the `{seconds}` placeholder in localization strings to replace it with the amount of seconds of delay.
- */
-const SECONDS = new RegExp('\\{seconds(?:\\|([^}]+))?\\}', 'g');
-
-/**
- * @name SECONDS_PLURAL
- * @description Matches the `{seconds|plural|...}` placeholder in localization strings, unlike SECONDS RegEx, this one handles pluralization.
- */
-const SECONDS_PLURAL = new RegExp('\\{seconds\\|plural\\|([^}]+)\\}', 'g');
-
-/**
- * @name MINUTES
- * @description The same as `SECONDS`, but for minutes.
- */
-const MINUTES = new RegExp('\\{minutes(?:\\|([^}]+))?\\}', 'g');
-
-/**
- * @name MINUTES_PLURAL
- * @description Do we really need an explanation for this RegEx?
- */
-const MINUTES_PLURAL = new RegExp('\\{minutes\\|plural\\|([^}]+)\\}', 'g');
-
-/**
- * @description Function to handle seconds format
- * @param phrase The phrase to format
- * @param time The time in seconds
- * @returns The formatted string
- * @example ```javascript
- * const phraseLocale = LOCALE_DELAY[Locale.EnglishUS];
- * const phrasePlural = FormatSecondsLocale(phraseLocale, 90);
- * console.log(phrasePlural); // 'You must wait 1 minute 30 seconds before using this command again.'
- *
- * const phraseSingular = FormatSecondsLocale(phraseLocale, 60);
- * console.log(phraseSingular); // 'You must wait 1 minute before using this command again.'
- * ```
- */
-
-function FormatSecondsLocale(phrase: string, time: number): string {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-
-    let formattedPhrase = phrase;
-
-    if (minutes > 0) {
-        // Replace plural forms for minutes first
-        formattedPhrase = formattedPhrase.replace(MINUTES_PLURAL, (match, p1) => {
-            return minutes === 1 ? '' : p1;
-        });
-        // Replace minute values
-        formattedPhrase = formattedPhrase.replace(MINUTES, (match, p1) => {
-            if (p1) {
-                // Handles patterns like {minutes|y $ minuto}
-                return p1.replace('$', minutes.toString());
-            }
-            return minutes.toString();
-        });
-    } else {
-        // If no minutes, remove all minute-related placeholders
-        formattedPhrase = formattedPhrase.replace(MINUTES, '').replace(MINUTES_PLURAL, '');
-    }
-
-    if (seconds > 0 || minutes === 0) {
-        // Replace plural forms for seconds
-        formattedPhrase = formattedPhrase.replace(SECONDS_PLURAL, (match, p1) => {
-            return seconds === 1 ? '' : p1;
-        });
-        // Replace second values
-        formattedPhrase = formattedPhrase.replace(SECONDS, seconds.toString());
-    } else {
-        // If there are minutes but no seconds, remove second-related placeholders
-        formattedPhrase = formattedPhrase.replace(SECONDS, '').replace(SECONDS_PLURAL, '');
-    }
-
-    // Clean up any remaining empty placeholders and extra spaces
-    return formattedPhrase.replace(/\{[^}]+\}/g, '').replace(/\s+/g, ' ').trim();
-}
-
-/**
- * @description Localization phrases for delay commands.
- * @example
- * const example = LOCALE_DELAY[Locale.EnglishUS];
- *
- * console.log(FormatTimeLocale(example, 5)); // 'You must wait 5 seconds before using this command again.'
- * console.log(FormatTimeLocale(example, 63)); // 'You must wait 3 seconds and 1 minute before using this command again.'
- */
-
-const LOCALE_DELAY: Record<Locale, string> = {
-    [Locale.SpanishLATAM]: 'Debes esperar {seconds} segundo{seconds|plural|s} {minutes|y $ minuto}{minutes|plural|s} antes de utilizar este comando denuevo.',
-    [Locale.EnglishUS]: 'You must wait {seconds} second{seconds|plural|s} {minutes|and $ minute}{minutes|plural|s} before using this command again.',
-    [Locale.EnglishGB]: 'Good heavens! One must exhibit a spot of patience, you see. A brief pause of {seconds} second{seconds|plural|s} {minutes|and $ minute}{minutes|plural|s} is required before another attempt, what?',
-    [Locale.SpanishES]: '¡Joder, tío! ¡Que te esperes {seconds} segundo{seconds|plural|s} {minutes|y $ minuto}{minutes|plural|s}, coño! ¡No flipes y dale un respiro al bot, hostia ya!',
-    [Locale.PortugueseBR]: 'Você deve esperar {seconds} segundo{seconds|plural|s} {minutes|e $ minuto}{minutes|plural|s} antes de usar este comando novamente.',
-    [Locale.French]: 'Vous devez attendre {seconds} seconde{seconds|plural|s} {minutes|et $ minute}{minutes|plural|s} avant d\'utiliser cette commande à nouveau.',
-    [Locale.German]: 'Sie müssen {seconds} Sekunde{seconds|plural|n} {minutes|und $ Minute}{minutes|plural|n} warten, bevor Sie diesen Befehl erneut verwenden können.',
-    [Locale.Italian]: 'Devi aspettare {seconds} secondo{seconds|plural|i} {minutes|e $ minuto}{minutes|plural|i} prima di utilizzare di nuovo questo comando.',
-    [Locale.Russian]: 'Вы должны подождать {seconds} секунд{seconds|plural|у} {minutes|и $ минут}{minutes|plural|ы} перед повторным использованием этой команды.',
-    [Locale.ChineseCN]: '您必须等待 {seconds} 秒 {minutes|和 $ 分钟} 才能再次使用此命令。',
-    [Locale.ChineseTW]: '您必須等待 {seconds} 秒 {minutes|和 $ 分鐘} 才能再次使用此命令。',
-    [Locale.Japanese]: 'このコマンドを再度使用するには、{seconds} 秒 {minutes|と $ 分} 待つ必要があります。',
-    [Locale.Korean]: '이 명령어를 다시 사용하려면 {seconds} 초 {minutes|하고 $ 분} 기다려야 합니다.',
-    [Locale.Bulgarian]: 'Трябва да изчакате {seconds} секунд{seconds|plural|и} {minutes|и $ минут}{minutes|plural|и}, преди да използвате тази команда отново.',
-    [Locale.Czech]: 'Musíte počkat {seconds} sekund{seconds|plural|u} {minutes|a $ minut}{minutes|plural|y}, než znovu použijete tento příkaz.',
-    [Locale.Danish]: 'Du skal vente {seconds} sekund{seconds|plural|er} {minutes|og $ minut}{minutes|plural|ter} før du kan bruge denne kommando igen.',
-    [Locale.Dutch]: 'Je moet {seconds} seconde{seconds|plural|n} {minutes|en $ minuut}{minutes|plural|en} wachten voordat je dit commando opnieuw kunt gebruiken.',
-    [Locale.Finnish]: 'Sinun on odotettava {seconds} sekunti{seconds|plural|a} {minutes|ja $ minuutti}{minutes|plural|a} ennen kuin voit käyttää tätä komentoa uudelleen.',
-    [Locale.Hungarian]: 'Várnod kell {seconds} másodperc{seconds|plural|et} {minutes|és $ perc}{minutes|plural|et}, mielőtt újra használhatod ezt a parancsot.',
-    [Locale.Norwegian]: 'Du må vente {seconds} sekund{seconds|plural|er} {minutes|og $ minutt}{minutes|plural|er} før du kan bruke denne kommandoen igjen.',
-    [Locale.Polish]: 'Musisz poczekać {seconds} sekund{seconds|plural|y} {minutes|i $ minut}{minutes|plural|y}, zanim ponownie użyjesz tego polecenia.',
-    [Locale.Romanian]: 'Trebuie să aștepți {seconds} secund{seconds|plural|ă} {minutes|și $ minut}{minutes|plural|e} înainte de a folosi din nou acest comandă.',
-    [Locale.Swedish]: 'Du måste vänta {seconds} sekund{seconds|plural|er} {minutes|och $ minut}{minutes|plural|er} innan du kan använda det här kommandot igen.',
-    [Locale.Turkish]: 'Bu komutu tekrar kullanmadan önce {seconds} saniye {minutes|ve $ dakika} beklemelisiniz.',
-    [Locale.Ukrainian]: 'Вам потрібно почекати {seconds} секунд{seconds|plural|и} {minutes|і $ хвилин}{minutes|plural|и}, перш ніж знову використовувати цю команду.',
-    [Locale.Hindi]: 'आपको इस कमांड का उपयोग करने से पहले {seconds} सेकंड {minutes|और $ मिनट} इंतजार करना होगा।',
-    [Locale.Indonesian]: 'Anda harus menunggu {seconds} detik {minutes|dan $ menit} sebelum menggunakan perintah ini lagi.',
-    [Locale.Greek]: 'Πρέπει να περιμένετε {seconds} δευτερόλεπτ{seconds|plural|ο} {minutes|και $ λεπτό}{minutes|plural|ά} πριν χρησιμοποιήσετε ξανά αυτήν την εντολή.',
-    [Locale.Croatian]: 'Morate pričekati {seconds} sekund{seconds|plural|u} {minutes|i $ minut}{minutes|plural|e} prije nego što ponovno upotrijebite ovu naredbu.',
-    [Locale.Lithuanian]: 'Prieš vėl naudodamiesi šiuo komandu, turite palaukti {seconds} sekund{seconds|plural|ę} {minutes|ir $ minut}{minutes|plural|es}.',
-    [Locale.Thai]: 'คุณต้องรอ {seconds} วินาที {minutes|และ $ นาที} ก่อนที่จะใช้คำสั่งนี้อีกครั้ง',
-    [Locale.Vietnamese]: 'Bạn phải đợi {seconds} giây {minutes|và $ phút} trước khi sử dụng lại lệnh này.'
-} as const;
+import LOCALE_DELAY, { ModularLocale } from "./modularlocale";
 
 /**
  * @description Localization phrases for various commands.
@@ -256,10 +129,15 @@ const LOCALE_ERROR: Record<Locale, string> = {
     [Locale.Vietnamese]: 'Đã xảy ra lỗi trong quá trình xử lý yêu cầu của bạn.'
 } as const;
 
+
+/**
+ * Exports
+ */
+
 export {
-    FormatSecondsLocale,
     LOCALE_DELAY,
     LOCALE_ERROR,
     LOCALE_FORBIDDEN,
-    LOCALE_NSFW
+    LOCALE_NSFW,
+    ModularLocale
 };
