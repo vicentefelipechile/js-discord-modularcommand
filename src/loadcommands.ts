@@ -1,50 +1,43 @@
 /**
- * @module LoadCommands
- * @description A module for loading modular commands into the Discord bot.
+ * @file Contains the logic for loading modular commands into the Discord bot client.
+ * @author vicentefelipechile
  * @license MIT
  */
 
-/**
- * Imports
- */
+import { CommandData } from "./types";
 
-import { CommandData } from "./modularcommand";
+// =================================================================================================
+// Main Loading Function
+// =================================================================================================
 
 /**
- * @param commandsArray For storing the loaded commands
- * @param command The command to load
+ * @description Loads one or more commands into an array.
+ * @param {CommandData[]} commandsArray The array where the loaded commands will be stored.
+ * @param {CommandData | CommandData[]} command The command(s) to load. Can be a single `CommandData` object or an array of them.
+ * @throws {TypeError} If a command is missing the `execute` function.
  * @example
- * const client = new Client();
- * client.commands = new Collection();
+ * ```typescript
+ * import { Collection } from "discord.js";
+ * import LoadCommand from "./loadcommands";
+ * import exampleCommand from "./commands/example";
  *
- * const commandsPath = join(__dirname, 'src', 'commands');
- * const commandFiles = readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+ * const commandsList: CommandData[] = [];
+ * LoadCommand(commandsList, exampleCommand);
  *
- * const commandsList = [];
- *
- * for (const file of commandFiles) {
- *  const filePath = join(commandsPath, file);
- *  const commandModule = require(filePath);
- *
- *  LoadCommands(commandsList, commandModule);
- * }
- *
+ * const client = { commands: new Collection<string, CommandData>() };
  * for (const cmd of commandsList) {
- *  client.commands.set(cmd.data.name, cmd);
+ *   client.commands.set(cmd.data.name, cmd);
  * }
+ * ```
  */
 
-function LoadCommand(commandsArray: Object[], command: CommandData | CommandData[]): void {
+export default function LoadCommand(commandsArray: CommandData[], command: CommandData | CommandData[]): void {
     const commands = Array.isArray(command) ? command : [command];
 
     for (const cmd of commands) {
-        if (typeof cmd.execute !== "function") throw new TypeError("Missing command execute function");
+        if (typeof cmd.execute !== "function") {
+            throw new TypeError(`Command "${cmd.data.name}" is missing a required 'execute' function.`);
+        }
         commandsArray.push(cmd);
     }
-};
-
-/**
- * Exports
- */
-
-export default LoadCommand;
+}

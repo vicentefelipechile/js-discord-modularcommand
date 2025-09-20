@@ -10,85 +10,17 @@
 
 import {
     ApplicationCommandOptionType as OptionType,
-    MessageComponentInteraction,
-    ChatInputCommandInteraction,
-    ModalSubmitInteraction,
-    SlashCommandBuilder,
-    ButtonBuilder,
-    Locale,
-    MessageFlags,
-    Message,
-    ButtonStyle,
-    Channel,
-    User,
-    Role,
-    GuildMember,
     LocalizationMap,
-    APIApplicationCommandOptionChoice,
-    CommandInteraction,
-    ButtonInteraction,
+    ButtonStyle,
+    Locale,
 } from 'discord.js';
 
-import { LOCALE_FORBIDDEN, LOCALE_DELAY, LOCALE_NSFW } from './locales.js';
 import ModularModal from './modularmodal.js';
+import ModularButton from './modularbutton.js';
+import { ButtonExecuteFunction, CommandExecuteFunction, CommandOption, ComponentExecuteFunction, ModalExecuteFunction, PermissionCheckFunction } from './types.js';
 
 
-/**
- * Types
- */
 
-type ArgType = string | number | boolean | User | Channel | Role | GuildMember;
-
-type CommandExecuteFunction = (params: {
-    interaction: ChatInputCommandInteraction;
-    command: ModularCommand;
-    locale: Record<string, any>;
-    args?: Record<string, ArgType>;
-}) => Promise<void>;
-
-type ComponentExecuteFunction = (params: {
-    interaction: MessageComponentInteraction;
-    command: ModularCommand;
-    locale: Record<string, any>;
-}) => Promise<void>;
-
-type ButtonExecuteFunction = (params: {
-    interaction: ButtonInteraction;
-    command: ModularCommand;
-    locale: Record<string, any>;
-    message: Message;
-}) => Promise<void>;
-
-type ModalExecuteFunction = (params: {
-    interaction: ModalSubmitInteraction;
-    command: ModularCommand;
-    locale: Record<string, any>;
-    args: Record<string, string>;
-}) => Promise<void>;
-
-type PermissionCheckFunction = (params: { interaction: CommandInteraction }) => boolean | Promise<boolean>;
-
-/**
- * @description Registered Command as object to be used outside the modular command system.
- * @example
- * const PingCommand = new ModularCommand('ping');
- *
- * PingCommand.setExecute(({interaction}) => {
- *     interaction.reply('Pong!');
- * });
- *
- * const cmds = RegisterCommand([PingCommand])
- * const cmd = cmds[0];
- * console.log(cmd.execute); // [Function: execute]
- */
-type CommandData = {
-    data: SlashCommandBuilder;
-    execute: (interaction: ChatInputCommandInteraction) => Promise<void>;
-    componentExecute?: (interaction: MessageComponentInteraction) => Promise<void>;
-    modalExecute?: (interaction: ModalSubmitInteraction) => Promise<void>;
-    buttonExecute?: (interaction: ButtonInteraction) => Promise<void>;
-    cooldown: number;
-};
 
 /**
  * Interface
@@ -97,13 +29,7 @@ type CommandData = {
 /**
  * @description Represents a command option for a modular command.
  */
-interface CommandOption {
-    name: string;
-    type: OptionType;
-    description: Record<Locale, string> | string;
-    required?: boolean;
-    choices?: APIApplicationCommandOptionChoice[];
-}
+
 
 /**
  * Variables
@@ -118,45 +44,6 @@ const ALLOWED_OPTION_TYPE = [
     OptionType.Channel,
 ];
 
-const COOLDOWNS_MAP = new Map<string, Map<string, number>>();
-
-
-/**
- * @class ModularButton
- * @description Represents a modular button that can be registered with Discord.js.
- * It allows for dynamic button creation and execution.
- */
-
-class ModularButton {
-    public buttonObject: ButtonBuilder;
-    public customId: string;
-    public style: ButtonStyle;
-    public execute: ButtonExecuteFunction = async () => { };
-
-    /**
-     * Creates a new button for the command.
-     * @param {string} customId The custom ID for the button.
-     * @param {ButtonStyle} style The style of the button.
-     */
-    constructor(customId: string, style: ButtonStyle) {
-        this.buttonObject = new ButtonBuilder();
-        this.buttonObject.setCustomId(customId);
-        this.buttonObject.setStyle(style);
-
-        this.customId = customId;
-        this.style = style;
-    }
-
-    /**
-     * Sets the execute function for the button.
-     * @param {ButtonExecuteFunction} executeFunction The function to execute.
-     * @return {ModularButton} The button instance for chaining.
-     */
-    setExecute(executeFunction: ButtonExecuteFunction): this {
-        this.execute = executeFunction;
-        return this;
-    }
-}
 
 
 /**
@@ -179,7 +66,7 @@ class ModularButton {
  *     PingCommand
  * ]);
  */
-class ModularCommand {
+export default class ModularCommand {
     public name: string;
     public description: string;
     public execute: CommandExecuteFunction;
@@ -195,7 +82,7 @@ class ModularCommand {
     public buttonsArray: ModularButton[];
     public isNSFW: boolean;
     public descriptionLocalizations?: LocalizationMap;
-    public localizationPhrases?: Record<Locale, any>;
+    public localizationPhrases?: Record<Locale, string>;
     public permissionCheck?: PermissionCheckFunction;
     public componentId?: string;
 
@@ -243,10 +130,10 @@ class ModularCommand {
 
     /**
      * Sets the localization phrases for the command.
-     * @param {Record<Locale, any>} localizationPhrases The localization phrases.
+     * @param {Record<Locale, string>} localizationPhrases The localization phrases.
      * @returns {ModularCommand} The command instance for chaining.
      */
-    setLocalizationPhrases(localizationPhrases: Record<Locale, any>): this {
+    setLocalizationPhrases(localizationPhrases: Record<Locale, string>): this {
         this.localizationPhrases = localizationPhrases;
         return this;
     }
@@ -351,215 +238,3 @@ class ModularCommand {
         return button;
     }
 }
-
-/**
- * Registers an array of modular commands.
- * @param {ModularCommand[]} commands An array of ModularCommand instances.
- * @returns {CommandData[]} An array of command data objects ready for Discord.js client.
- */
-const RegisterCommand = (commands: ModularCommand[]): CommandData[] => {
-    return commands.map(command => {
-        const commandBuilder = new SlashCommandBuilder()
-            .setName(command.name)
-            .setDescription(command.description)
-            .setDescriptionLocalizations(command.descriptionLocalizations || null);
-
-        COOLDOWNS_MAP.set(command.name, new Map<string, number>());
-
-        const options: Record<string, OptionType> = {};
-
-        command.options.forEach(opt => {
-            const description =
-                typeof opt.description === 'string' ?
-                opt.description :
-                (opt.description[Locale.EnglishUS] || `The description for ${opt.name} in English.`);
-    
-            const descriptionsLocalizations = typeof opt.description === 'object' ? opt.description : {};
-
-            if (!description) {
-                throw new Error(`Option '${opt.name}' is missing a description.`);
-            }
-
-            options[opt.name] = opt.type;
-
-            const optionBuilder = (option: any) => {
-                option.setName(opt.name)
-                    .setDescription(description)
-                    .setRequired(opt.required || false)
-                    .setDescriptionLocalizations(descriptionsLocalizations);
-
-                if (opt.choices && opt.choices.length > 0) {
-                    option.addChoices(...opt.choices);
-                }
-
-                return option;
-            };
-
-            switch (opt.type) {
-                case OptionType.String: commandBuilder.addStringOption(optionBuilder); break;
-                case OptionType.Boolean: commandBuilder.addBooleanOption(optionBuilder); break;
-                case OptionType.Integer: commandBuilder.addIntegerOption(optionBuilder); break;
-                case OptionType.Number: commandBuilder.addNumberOption(optionBuilder); break;
-                case OptionType.User: commandBuilder.addUserOption(optionBuilder); break;
-                case OptionType.Channel: commandBuilder.addChannelOption(optionBuilder); break;
-                default:
-                    throw new Error(`Unsupported option type: ${opt.type}`);
-            }
-        });
-
-        const executeBuilder = async (interaction: ChatInputCommandInteraction): Promise<void> => {
-            // User has permissions
-            if (command.permissionCheck && !command.permissionCheck({interaction})) {
-                await interaction.reply({
-                    content: LOCALE_FORBIDDEN[interaction.locale],
-                    flags: MessageFlags.Ephemeral,
-                });
-                return;
-            }
-
-            // User is using a NSFW command in a non-NSFW channel
-            if (command.isNSFW && (!interaction.channel || !('nsfw' in interaction.channel) || !interaction.channel.nsfw)) {
-                await interaction.reply({
-                    content: LOCALE_NSFW[interaction.locale],
-                    flags: MessageFlags.Ephemeral,
-                });
-                return;
-            }
-
-            // User is in a cooldown
-            const lastTime = COOLDOWNS_MAP.get(command.name)?.get(interaction.user.id);
-            if (lastTime) {
-                const cooldownDuration = (Date.now() / 1000) - lastTime;
-                if (cooldownDuration < command.cooldown) {
-                    await interaction.reply({
-                        content: LOCALE_DELAY[interaction.locale].formatTime(command.cooldown - cooldownDuration),
-                        flags: MessageFlags.Ephemeral,
-                    });
-                    return;
-                }
-                COOLDOWNS_MAP.get(command.name)?.set(interaction.user.id, Date.now() / 1000);
-            }
-
-            const args: Record<string, any> = {};
-
-            for (const option of Object.keys(options)) {
-                switch (options[option]) {
-                    case OptionType.String: args[option] = interaction.options.getString(option, false); break;
-                    case OptionType.Boolean: args[option] = interaction.options.getBoolean(option, false); break;
-                    case OptionType.Integer: args[option] = interaction.options.getInteger(option, false); break;
-                    case OptionType.Number: args[option] = interaction.options.getNumber(option, false); break;
-                    case OptionType.User: args[option] = interaction.options.getUser(option, false); break;
-                    case OptionType.Channel: args[option] = interaction.options.getChannel(option, false); break;
-                    default:
-                        throw new Error(`Unsupported option type: ${options[option]}`);
-                }
-            }
-
-            const localeTarget = (command.localizationPhrases && command.localizationPhrases[interaction.locale])
-                ? interaction.locale
-                : Locale.EnglishUS;
-            const localeTable = command.localizationPhrases;
-
-            // If the value Locale.EnglishUS doesn't exist, throw an error
-            if (!localeTable || !localeTable[Locale.EnglishUS]) {
-                throw new Error(`Missing localization for EnglishUS in command ${command.name}`);
-            }
-
-            const customId: string = (interaction as any).customId;
-            if (customId && command.customIdHandlers[customId]) {
-                await command.customIdHandlers[customId]({
-                    interaction,
-                    args,
-                    command,
-                    locale: localeTable ? localeTable[localeTarget] : {},
-                });
-            } else {
-                await command.execute({
-                    interaction,
-                    args,
-                    command,
-                    locale: localeTable ? localeTable[localeTarget] : {},
-                });
-            }
-        };
-
-        const componentExecuteBuilder = async (interaction: MessageComponentInteraction): Promise<void> => {
-            if (!command.componentExecute) return;
-            if (!interaction.customId.startsWith(command.getComponentId()!)) return;
-
-            const localeTarget = (command.localizationPhrases && command.localizationPhrases[interaction.locale])
-                ? interaction.locale
-                : Locale.EnglishUS;
-            const localeTable = command.localizationPhrases;
-
-            await command.componentExecute({
-                interaction,
-                command,
-                locale: localeTable ? localeTable[localeTarget] : {},
-            });
-        };
-
-        const modalExecuteBuilder = async (interaction: ModalSubmitInteraction): Promise<void> => {
-            const modalId = interaction.customId;
-            const modalObject = command.modals.get(modalId);
-            if (!modalObject) return;
-
-            const args: Record<string, string> = {};
-            for (const [id] of modalObject.modalInputs.entries()) {
-                args[id] = interaction.fields.getTextInputValue(id);
-            }
-
-            const localeTarget = (command.localizationPhrases && command.localizationPhrases[interaction.locale])
-                ? interaction.locale
-                : Locale.EnglishUS;
-            const localeTable = command.localizationPhrases;
-
-            // If the value Locale.EnglishUS doesn't exist, throw an error
-            if (!localeTable || !localeTable[Locale.EnglishUS]) {
-                throw new Error(`Missing localization for EnglishUS in command ${command.name}`);
-            }
-
-            await modalObject.execute({
-                interaction,
-                args,
-                command,
-                locale: localeTable ? localeTable[localeTarget] : {},
-            });
-        };
-
-        const buttonExecuteBuilder = async (interaction: ButtonInteraction): Promise<void> => {
-            const buttonId = interaction.customId;
-            const buttonObject = command.buttons.get(buttonId);
-            if (!buttonObject) return;
-
-            const localeTarget = (command.localizationPhrases && command.localizationPhrases[interaction.locale])
-                ? interaction.locale
-                : Locale.EnglishUS;
-            const localeTable = command.localizationPhrases;
-
-            await buttonObject.execute({
-                interaction,
-                command,
-                locale: localeTable ? localeTable[localeTarget] : {},
-                message: interaction.message,
-            });
-        };
-
-        return {
-            data: commandBuilder,
-            execute: executeBuilder,
-            componentExecute: command.componentExecute ? componentExecuteBuilder : undefined,
-            modalExecute: command.modals.size > 0 ? modalExecuteBuilder : undefined,
-            buttonExecute: command.buttons.size > 0 ? buttonExecuteBuilder : undefined,
-            cooldown: command.cooldown,
-        };
-    });
-};
-
-export default ModularCommand;
-export {
-    RegisterCommand,
-    ModularCommand,
-    ModularButton,
-    CommandData,
-};

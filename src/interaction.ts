@@ -1,96 +1,102 @@
 /**
- * @module Interaction
- * @description Function to handle interactions with the bot.
+ * @file Contains the logic for handling Discord bot interactions.
+ * @author vicentefelipechile
  * @license MIT
  */
 
-/**
- * Imports
- */
-
-import { BaseInteraction, Client, Collection, CommandInteraction, MessageComponentInteraction, MessageFlags, ModalSubmitInteraction } from "discord.js";
+import { BaseInteraction, Collection, CommandInteraction, MessageComponentInteraction, MessageFlags, ModalSubmitInteraction } from "discord.js";
 import { LOCALE_ERROR } from "./locales";
-import { CommandData } from "./modularcommand";
+import { ClientWithCommands } from "./types";
+
+// =================================================================================================
+// Interfaces and Types
+// =================================================================================================
 
 /**
- * Variables
+ * @interface InteractionHandlerArgs
+ * @description Defines the arguments for the custom interaction handler function.
  */
-
 interface InteractionHandlerArgs {
+    /** The interaction received from Discord. */
     interaction: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction;
 }
 
+/**
+ * @type InteractionHandler
+ * @description A function signature for a custom interaction handler.
+ * @returns {Promise<boolean | undefined>} A promise that resolves to `false` to stop the default handler, or `true`/`undefined` to continue.
+ */
 type InteractionHandler = (args: InteractionHandlerArgs) => Promise<boolean | undefined>;
-type ClientArg = Client & { commands: Collection<string, any> };
+
+// =================================================================================================
+// Main Handler Function
+// =================================================================================================
 
 /**
- * @param {Client} client
- * @param {Function} customHandler
- * @returns {Function} - A function that handles the interaction.
+ * @description Creates a modular command handler function for the Discord client.
+ * @param {ClientWithCommands} client The Discord client instance with a commands collection.
+ * @param {InteractionHandler} customHandler A custom function to handle interactions before the default logic.
+ * @returns {(interaction: BaseInteraction) = Promise<void>} The main interaction handler function.
  */
-function ModularCommandHandler(client: ClientArg, customHandler: InteractionHandler): (interaction: BaseInteraction) => Promise<void> {
-    // Check if client has commands collection
-    if (!client.commands) throw new Error(`Client is missing commands collection`);
-    if (!(client.commands instanceof Collection)) throw new Error(`Client.commands is not a Collection`);
 
-    // Define the handler function
-    const handler = async (interaction: BaseInteraction) => {
-        if (!interaction.isChatInputCommand() && !interaction.isMessageComponent() && !interaction.isModalSubmit()) return;
+export default function ModularCommandHandler(client: ClientWithCommands, customHandler: InteractionHandler): (interaction: BaseInteraction) => Promise<void> {
+    if (!client.commands) {
+        throw new Error(`Client is missing the 'commands' collection.`);
+    }
+    if (!(client.commands instanceof Collection)) {
+        throw new Error(`Client.commands is not an instance of Discord.js Collection.`);
+    }
 
-        const response = await customHandler({ interaction: interaction as CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction });
+    const handler = async (interaction: BaseInteraction): Promise<void> => {
+        if (!interaction.isChatInputCommand() && !interaction.isMessageComponent() && !interaction.isModalSubmit()) {
+            return;
+        }
+
+        const response = await customHandler({ interaction });
         if (response === false) return;
 
-        // Continue with the default interaction handling
         let commandName: string;
         if (interaction.isChatInputCommand()) {
             commandName = interaction.commandName;
-        } else if (interaction.customId !== undefined) {
+        } else if (interaction.customId) {
             commandName = interaction.customId.split('_')[0];
         } else {
             const errorMessage = LOCALE_ERROR[interaction.locale];
             if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({
-                    content: errorMessage,
-                    flags: MessageFlags.Ephemeral
-                });
+                await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
             } else {
-                await interaction.reply({
-                    content: errorMessage,
-                    flags: MessageFlags.Ephemeral
-                });
+                await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
             }
-
-            throw new Error(`Interaction does not have a commandName or customId: ${interaction.id}`);
+            console.error(`Interaction does not have a commandName or customId: ${interaction.id}`);
+            return;
         }
 
-        const command: CommandData = client.commands.get(commandName);
-        if (!command) throw new Error(`No command found for interaction: ${interaction.id} with command name: ${commandName}`);
+        const command = client.commands.get(commandName);
+        if (command === undefined) {
+            console.error(`No command found for interaction: ${interaction.id} with command name: ${commandName}`);
+            return;
+        }
 
         try {
-            if (interaction.isChatInputCommand()) await command.execute(interaction);
-            else if (interaction.isButton() && command.buttonExecute) await command.buttonExecute(interaction);
-            else if (interaction.isMessageComponent() && command.componentExecute) await command.componentExecute(interaction);
-            else if (interaction.isModalSubmit() && command.modalExecute) await command.modalExecute(interaction);
+            if (interaction.isChatInputCommand()) {
+                await command.execute(interaction);
+            } else if (interaction.isButton() && command.buttonExecute) {
+                await command.buttonExecute(interaction);
+            } else if (interaction.isMessageComponent() && command.componentExecute) {
+                await command.componentExecute(interaction);
+            } else if (interaction.isModalSubmit() && command.modalExecute) {
+                await command.modalExecute(interaction);
+            }
         } catch (error) {
             const errorMessage = LOCALE_ERROR[interaction.locale];
             if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({
-                    content: errorMessage,
-                    flags: MessageFlags.Ephemeral
-                });
+                await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
             } else {
-                await interaction.reply({
-                    content: errorMessage,
-                    flags: MessageFlags.Ephemeral
-                });
+                await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
             }
-
             console.error(`Error handling interaction: ${interaction.id}`, error);
         }
     };
 
-    // Return the handler function
     return handler;
 }
-
-export default ModularCommandHandler;

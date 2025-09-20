@@ -1,62 +1,52 @@
 /**
- * @module ModularModal
- * @description A module for creating and managing modals in a easy way for me.
+ * @file Contains the structure and logic for creating modular modals.
+ * @author vicentefelipechile
  * @license MIT
  */
 
-/**
- * Imports
- */
+import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
+import { LocaleKey, ModalExecuteFunction } from "./types";
+import ModularCommand from "./modularcommand";
 
-import { ActionRowBuilder, ModalBuilder, ModalSubmitInteraction, TextInputBuilder, TextInputStyle } from "discord.js";
-import { ModularCommand } from "./modularcommand";
-
-/**
- * Types
- */
-
-type ModalExecuteFunction = (params: {
-    interaction: ModalSubmitInteraction;
-    args: Record<string, string>;
-    command: ModularCommand;
-    locale: Record<string, any>;
-}) => Promise<void>;
-
+// =================================================================================================
+// Main Class
+// =================================================================================================
 
 /**
  * @class ModularModal
- * @description Represents a modular modal that can be registered with Discord.js.
- * It allows for dynamic modal creation and execution.
+ * @description Represents a modular modal that can be dynamically created and managed.
  */
-class ModularModal {
+export default class ModularModal {
+    /** The Discord.js ModalBuilder instance. */
     public modalObject: ModalBuilder;
+    /** The unique custom ID for the modal, formatted as `${command.name}_${modalId}`. */
     public customId: string;
+    /** The base ID for the modal, used for localization. */
     public modalId: string;
+    /** A map to store the text input components of the modal. */
     public modalInputs: Map<string, TextInputBuilder>;
+    /** The command instance to which this modal belongs. */
     public command: ModularCommand;
+    /** The function to execute when the modal is submitted. */
     public execute: ModalExecuteFunction = async () => { };
 
     /**
-     * Creates a new modal for the command.
-     * @param {string} modalId The ID for the modal.
-     * @param {ModularCommand} command The command that this modal belongs to.
+     * @description Creates a new ModularModal instance.
+     * @param {string} modalId The base ID for the modal.
+     * @param {ModularCommand} command The command that this modal is associated with.
      */
     constructor(modalId: string, command: ModularCommand) {
-        const customModalId = `${command.name}_${modalId}`;
-
-        this.modalObject = new ModalBuilder();
-        this.modalObject.setCustomId(customModalId);
-        this.customId = customModalId;
+        this.customId = `${command.name}_${modalId}`;
         this.modalId = modalId;
-
-        this.modalInputs = new Map();
         this.command = command;
+        this.modalObject = new ModalBuilder().setCustomId(this.customId);
+        this.modalInputs = new Map();
     }
 
     /**
-     * Sets the execute function for the modal.
-     * @param {ModalExecuteFunction} executeFunction The function to execute.
-     * @returns {ModularModal} The modal instance for chaining.
+     * @description Sets the execution function for the modal's submission event.
+     * @param {ModalExecuteFunction} executeFunction The function to run when the modal is submitted.
+     * @returns {this} The current ModularModal instance for method chaining.
      */
     setExecute(executeFunction: ModalExecuteFunction): this {
         this.execute = executeFunction;
@@ -64,51 +54,44 @@ class ModularModal {
     }
 
     /**
-     * Returns the modal custom ID.
-     * @returns {string} The modal custom ID.
-     */
-    getCustomId(): string {
-        return this.customId;
-    }
-
-    /**
-     * Creates a new text input for the modal.
-     * @param {string} id The ID for the text input.
-     * @param {TextInputStyle} style The style of the text input.
+     * @description Creates a new text input component and adds it to the modal.
+     * @param {string} id The custom ID for the text input.
+     * @param {TextInputStyle} style The visual style of the text input.
      * @returns {TextInputBuilder} The created text input instance.
      */
     newTextInput(id: string, style: TextInputStyle): TextInputBuilder {
-        const textInput = new TextInputBuilder();
-        textInput.setCustomId(id);
-        textInput.setStyle(style);
+        const textInput = new TextInputBuilder()
+            .setCustomId(id)
+            .setStyle(style);
+
         this.modalInputs.set(id, textInput);
 
-        this.modalObject.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(textInput));
+        const actionRow = new ActionRowBuilder<TextInputBuilder>().addComponents(textInput);
+        this.modalObject.addComponents(actionRow);
+
         return textInput;
     }
 
     /**
-     * Builds the modal object.
-     * @param {Record<string, any>} locale The localization object for the modal.
-     * @return {ModalBuilder} The built modal object.
+     * @description Builds the final modal object, applying localized titles and labels.
+     * @param {LocaleKey} locale The localization object containing translated texts.
+     * @returns {ModalBuilder} The fully constructed modal object ready to be sent to a user.
      */
-    build(locale: Record<string, any>): ModalBuilder {
-        const selfModal = this.modalObject;
-        const commandName = this.command.name;
-
-        selfModal.setTitle(locale[`${commandName}.${this.modalId}.title`]);
+    build(locale: LocaleKey): ModalBuilder {
+        this.modalObject.setTitle(locale[`${this.command.name}.${this.modalId}.title`]);
 
         this.modalInputs.forEach((input, id) => {
-            input.setLabel(locale[`${commandName}.${id}.label`]);
-            input.setPlaceholder(locale[`${commandName}.${id}.placeholder`]);
+            const labelKey = `${this.command.name}.${id}.label`;
+            const placeholderKey = `${this.command.name}.${id}.placeholder`;
+
+            if (locale[labelKey]) {
+                input.setLabel(locale[labelKey]);
+            }
+            if (locale[placeholderKey]) {
+                input.setPlaceholder(locale[placeholderKey]);
+            }
         });
 
-        return selfModal;
+        return this.modalObject;
     }
 }
-
-/**
- * Exports
- */
-
-export default ModularModal;
