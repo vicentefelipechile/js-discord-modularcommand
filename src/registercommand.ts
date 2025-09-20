@@ -94,12 +94,7 @@ function createChatInputExecutor(command: ModularCommand, options: Record<string
         const locale = getCommandLocale(command, interaction);
 
         // Execute Handler
-        const { customId } = interaction.isMessageComponent() ? interaction : { customId: null };
-        if (customId && command.customIdHandlers[customId]) {
-            await command.customIdHandlers[customId]({ interaction, args, command, locale });
-        } else {
-            await command.execute({ interaction, args, command, locale });
-        }
+        await command.execute({ interaction, args, command, locale });
     };
 }
 
@@ -115,7 +110,6 @@ function createComponentExecutor(command: ModularCommand) {
     return async (interaction: MessageComponentInteraction): Promise<void> => {
         if (!interaction.customId.startsWith(command.componentId || '')) return;
 
-        // Llama a la constante, que TypeScript sabe que está definida.
         await executor({
             interaction,
             command,
@@ -182,9 +176,11 @@ function createButtonExecutor(command: ModularCommand) {
  * @param {ModularCommand[]} commands An array of ModularCommand instances.
  * @returns {CommandData[]} An array of command data objects ready for the Discord.js client.
  */
-export default function RegisterCommand(commands: ModularCommand[]): CommandData[] {
+export default function RegisterCommand(commands: ModularCommand[] | ModularCommand): CommandData[] {
+    commands = Array.isArray(commands) ? commands : [commands];
+    
     return commands.map(command => {
-        // --- Build SlashCommand Data ---
+        // Build SlashCommand Data
         const commandBuilder = new SlashCommandBuilder()
             .setName(command.name)
             .setDescription(command.description)
@@ -225,12 +221,11 @@ export default function RegisterCommand(commands: ModularCommand[]): CommandData
                 case OptionType.Integer: commandBuilder.addIntegerOption(optionBuilder); break;
                 case OptionType.Number: commandBuilder.addNumberOption(optionBuilder); break;
                 case OptionType.User: commandBuilder.addUserOption(optionBuilder); break;
-                case OptionType.Channel: commandBuilder.addChannelOption(optionBuilder); break;
                 default: throw new Error(`Unsupported option type: ${opt.type}`);
             }
         });
 
-        // --- Assign Handlers using Constructors ---
+        // Assign Handlers using Constructors
         return {
             data: commandBuilder,
             execute: createChatInputExecutor(command, options),

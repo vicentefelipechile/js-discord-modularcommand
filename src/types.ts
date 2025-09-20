@@ -36,7 +36,7 @@ export interface CommandOption {
     /** The name of the option, must be unique within the command. */
     name: string;
     /** The data type the option expects (e.g., STRING, USER, CHANNEL). */
-    type: OptionType;
+    type: AllowedOptionType;
     /** The description of the option. It can be a string or an object for localization. */
     description: Record<Locale, string> | string;
     /** Defines if the option is required. */
@@ -67,6 +67,24 @@ export interface CommandData {
 // =================================================================================================
 // Generic and Utility Types
 // =================================================================================================
+
+/**
+ * @const ALLOWED_OPTION_TYPE
+ * @description A list of allowed option types for slash commands.
+ */
+export const ALLOWED_OPTION_TYPE = [
+    OptionType.String,
+    OptionType.Boolean,
+    OptionType.Integer,
+    OptionType.Number,
+    OptionType.User,
+] as const;
+
+/**
+ * @type AllowedOptionType
+ * @description The union type of allowed option types for slash commands.
+ */
+export type AllowedOptionType = typeof ALLOWED_OPTION_TYPE[number];
 
 /**
  * @type LocaleKey
