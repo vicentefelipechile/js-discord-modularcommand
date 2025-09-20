@@ -1,5 +1,5 @@
 /**
- * @module ModularLocales
+ * @module ModularLocale
  * @description Generic localization phrases used throughout the application.
  * @license MIT
  */

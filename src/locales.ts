@@ -1,18 +1,18 @@
 /**
- * @module Locales
- * @description Generic localization phrases used throughout the application.
+ * @file Contains the generic localization phrases used throughout the application.
+ * @author vicentefelipechile
  * @license MIT
  */
 
 import { Locale } from "discord.js";
 import LOCALE_DELAY, { ModularLocale } from "./modularlocale";
 
+// =================================================================================================
+// Localization Phrases
+// =================================================================================================
+
 /**
- * @description Localization phrases for various commands.
- * @example ```js
- * const example = LOCALE_FORBIDDEN[Locale.EnglishUS];
- * console.log(example); // 'You do not have permission to use this command.'
- * ```
+ * @description Localization phrases for various commands, specifically for permission errors.
  */
 const LOCALE_FORBIDDEN: Record<Locale, string> = {
     [Locale.SpanishLATAM]: 'No tienes permiso para usar este comando.',
@@ -34,7 +34,7 @@ const LOCALE_FORBIDDEN: Record<Locale, string> = {
     [Locale.Dutch]: 'Je hebt geen toestemming om deze opdracht te gebruiken.',
     [Locale.Finnish]: 'Sinulla ei ole lupaa käyttää tätä komentoa.',
     [Locale.Hungarian]: 'Nincs jogosultságod ehhez a parancshoz.',
-    [Locale.Norwegian]: 'Du har ikke tillatelse til å bruke denne kommandoen.',
+    [Locale.Norwegian]: 'Du har ikke behörighet til å bruke denne kommandoen.',
     [Locale.Polish]: 'Nie masz uprawnień do używania tej komendy.',
     [Locale.Romanian]: 'Nu ai permisiunea de a folosi acest comandă.',
     [Locale.Swedish]: 'Du har inte behörighet att använda det här kommandot.',
@@ -50,11 +50,7 @@ const LOCALE_FORBIDDEN: Record<Locale, string> = {
 } as const;
 
 /**
- * @description Localization phrases for NSFW commands.
- * @example ```js
- * const example = LOCALE_NSFW[Locale.EnglishUS];
- * console.log(example); // 'This command can only be used in NSFW channels.'
- * ```
+ * @description Localization phrases for NSFW command usage errors.
  */
 const LOCALE_NSFW: Record<Locale, string> = {
     [Locale.SpanishLATAM]: 'Este comando solo puede ser usado en canales NSFW.',
@@ -91,8 +87,8 @@ const LOCALE_NSFW: Record<Locale, string> = {
     [Locale.Vietnamese]: 'Lệnh này chỉ có thể được sử dụng trong các kênh NSFW.'
 } as const;
 
- /**
- * Error messages for different locales.
+/**
+ * @description Localization phrases for general application errors.
  */
 const LOCALE_ERROR: Record<Locale, string> = {
     [Locale.SpanishLATAM]: 'Ocurrió un error al procesar tu solicitud.',
@@ -129,10 +125,9 @@ const LOCALE_ERROR: Record<Locale, string> = {
     [Locale.Vietnamese]: 'Đã xảy ra lỗi trong quá trình xử lý yêu cầu của bạn.'
 } as const;
 
-
-/**
- * Exports
- */
+// =================================================================================================
+// Exports
+// =================================================================================================
 
 export {
     LOCALE_DELAY,
