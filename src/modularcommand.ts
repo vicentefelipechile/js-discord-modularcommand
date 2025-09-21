@@ -80,7 +80,7 @@ export default class ModularCommand {
     /** Whether the command is marked as Not Safe For Work (NSFW). */
     public isNSFW: boolean;
     /** (Optional) An object with localized phrases to be used within the command's execution. */
-    public localizationPhrases?: Partial<Record<Locale, string>>;
+    public localizationPhrases?: LocalizationMap;
     /** (Optional) The function that checks if a user has permission to execute the command. */
     public permissionCheck?: PermissionCheckFunction;
     /** (Optional) The base ID for components associated with this command. */
@@ -160,10 +160,10 @@ export default class ModularCommand {
     /**
      * Sets the localization phrases for the command.
      * Accepts a partial record, so not all locales need to be provided.
-     * @param {Partial<Record<Locale, string>>} localizationPhrases The localization phrases.
+     * @param {LocalizationMap} localizationPhrases The localization phrases.
      * @returns {ModularCommand} The command instance for chaining.
      */
-    setLocalizationPhrases(localizationPhrases: Partial<Record<Locale, string>>): this {
+    setLocalizationPhrases(localizationPhrases: LocalizationMap): this {
         this.localizationPhrases = {
             ...this.localizationPhrases,
             ...localizationPhrases,
