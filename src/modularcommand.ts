@@ -121,11 +121,21 @@ export default class ModularCommand {
     }
 
     /**
+     * @deprecated Use setLocalizationDescription instead.
      * Sets the description localizations for the command.
      * @param {LocalizationMap} localizations The description localizations map.
      * @returns {ModularCommand} The command instance for chaining.
      */
     setLocalizationsDescription(localizations: LocalizationMap): this {
+        return this.setLocalizationDescription(localizations);
+    }
+
+    /**
+     * Sets the description localizations for the command.
+     * @param {LocalizationMap} localizations The description localizations map.
+     * @returns {ModularCommand} The command instance for chaining.
+     */
+    setLocalizationDescription(localizations: LocalizationMap): this {
         this.description = localizations[Locale.EnglishUS] || this.description;
         this.descriptionLocalizations = localizations;
         return this;
