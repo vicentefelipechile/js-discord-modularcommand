@@ -33,12 +33,16 @@ type CommandLocale = Partial<Record<Locale, string>> & { [Locale.EnglishUS]: str
  * @param {ModularCommand} command The command instance.
  * @param {Interaction} interaction The interaction object to get the locale from.
  * @returns {CommandLocale} The resolved locale object.
- * @throws {Error} If the EnglishUS localization is missing.
+ * @throws {Error} If the EnglishUS localization is missing when at least one localization is defined.
  */
 function getCommandLocale(command: ModularCommand, interaction: Interaction | MessageComponentInteraction): Partial<CommandLocale> {
     const localeTable = command.localizationPhrases;
 
-    if (!localeTable || !localeTable[Locale.EnglishUS]) {
+    if (!localeTable || Object.keys(localeTable).length === 0) {
+        return {};
+    }
+
+    if (!localeTable[Locale.EnglishUS]) {
         throw new Error(`Missing localization for EnglishUS in command ${command.name}`);
     }
 
