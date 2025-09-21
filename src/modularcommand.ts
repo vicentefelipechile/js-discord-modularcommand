@@ -60,7 +60,7 @@ export default class ModularCommand {
     /** The options (arguments) that the command accepts. */
     public options: CommandOption[];
     /** An object containing localizations for the names and descriptions of the options. */
-    public optionsLocalizations: Record<string, Record<Locale, string>>;
+    public optionsLocalizations: LocalizationMap;
 
     // Execution Handlers
     /** The main function that executes when the command is invoked. */
@@ -80,7 +80,7 @@ export default class ModularCommand {
     /** Whether the command is marked as Not Safe For Work (NSFW). */
     public isNSFW: boolean;
     /** (Optional) An object with localized phrases to be used within the command's execution. */
-    public localizationPhrases?: Record<Locale, string>;
+    public localizationPhrases?: Partial<Record<Locale, string>>;
     /** (Optional) The function that checks if a user has permission to execute the command. */
     public permissionCheck?: PermissionCheckFunction;
     /** (Optional) The base ID for components associated with this command. */
@@ -137,27 +137,37 @@ export default class ModularCommand {
      */
     setLocalizationDescription(localizations: LocalizationMap): this {
         this.description = localizations[Locale.EnglishUS] || this.description;
-        this.descriptionLocalizations = localizations;
+        this.descriptionLocalizations = {
+            ...this.descriptionLocalizations,
+            ...localizations,
+        };
         return this;
     }
 
     /**
      * Sets the localizations for the command's options.
-     * @param {Record<string, Record<Locale, string>>} localizations An object with the localizations.
+     * @param {LocalizationMap} localizations An object with the localizations.
      * @returns {ModularCommand} The command instance for chaining.
      */
-    setLocalizationOptions(localizations: Record<string, Record<Locale, string>>): this {
-        this.optionsLocalizations = localizations;
+    setLocalizationOptions(localizations: LocalizationMap): this {
+        this.optionsLocalizations = {
+            ...this.optionsLocalizations,
+            ...localizations,
+        };
         return this;
     }
 
     /**
      * Sets the localization phrases for the command.
-     * @param {Record<Locale, string>} localizationPhrases The localization phrases.
+     * Accepts a partial record, so not all locales need to be provided.
+     * @param {Partial<Record<Locale, string>>} localizationPhrases The localization phrases.
      * @returns {ModularCommand} The command instance for chaining.
      */
-    setLocalizationPhrases(localizationPhrases: Record<Locale, string>): this {
-        this.localizationPhrases = localizationPhrases;
+    setLocalizationPhrases(localizationPhrases: Partial<Record<Locale, string>>): this {
+        this.localizationPhrases = {
+            ...this.localizationPhrases,
+            ...localizationPhrases,
+        };
         return this;
     }
 
