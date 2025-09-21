@@ -180,6 +180,9 @@ export default function RegisterCommand(commands: ModularCommand[] | ModularComm
     commands = Array.isArray(commands) ? commands : [commands];
     
     return commands.map(command => {
+        if (command.name === undefined) throw new Error("A command is missing a name.");
+        if (command.description === undefined) throw new Error(`Command "${command.name}" is missing a description.`);
+
         // Build SlashCommand Data
         const commandBuilder = new SlashCommandBuilder()
             .setName(command.name)
