@@ -52,8 +52,10 @@ export default function ModularCommandHandler(client: ClientWithCommands, custom
             return;
         }
 
-        const response = await customHandler({ interaction });
-        if (response === false) return;
+        if (typeof customHandler === "function") {
+            const response = await customHandler({ interaction });
+            if (response === false) return;
+        }
 
         let commandName: string;
         if (interaction.isChatInputCommand()) {

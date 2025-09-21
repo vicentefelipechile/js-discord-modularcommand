@@ -8,7 +8,7 @@
     "node"
   ],
   "license": "MIT",
-  "author": "SummerTYT",
+  "author": "vicentefelipechile",
   "type": "commonjs",
   "types": "./dist/index.d.ts",
   "files": [
