@@ -6,17 +6,12 @@ A module to create and manage modular commands in a simple way for Discord.js bo
 
 This library simplifies the creation and management of slash commands for [Discord.js](https://discord.js.org/). It allows you to structure your commands in a modular way, making it easier to handle logic, permissions, cooldowns, localizations, and interactive components like buttons and modals.
 
-The main classes are:
-- [`ModularCommand`](src/modularcommand.ts): To define the base structure of a command.
-- [`ModularButton`](src/modularcommand.ts): To create interactive buttons associated with a command.
-- [`ModularModal`](src/modularcommand.ts): To create modals (forms) that the user can fill out.
-
 ## How to use it?
 
 First, install the package in your project:
 
 ```sh
-npm install js-discord-modularcommand
+npm install js-discord-modularcommand@latest
 ```
 
 Then, you can create your commands in a modular fashion. Here is a basic example of a `ping` command:
@@ -24,7 +19,7 @@ Then, you can create your commands in a modular fashion. Here is a basic example
 ```javascript
 // filepath: commands/ping.js
 const { ModularCommand, RegisterCommand } = require('js-discord-modularcommand');
-const { PermissionFlagsBits } = require('discord.js');
+const { PermissionFlagsBits, Locale } = require('discord.js');
 
 // Create a new command instance
 const PingCommand = new ModularCommand('ping');
@@ -37,15 +32,31 @@ PingCommand.setPermissionCheck(async ({ interaction }) => {
     return interaction.member.permissions.has(PermissionFlagsBits.Administrator);
 });
 
-// Define the logic to be executed
-PingCommand.setExecute(async ({ interaction }) => {
-    await interaction.reply('Pong!');
+// Optional: Localization to use with 'locale'
+pong.setLocalizationPhrases({
+    [Locale.EnglishUS]: {
+        response: 'Replies with Pong!',
+    },
+    [Locale.SpanishLATAM]: {
+        response: 'Responde con Pong!',
+    }
 });
 
-// Register the command so it can be used by the Discord.js client
-module.exports = RegisterCommand([
-    PingCommand
-]);
+// Set the command's description
+pong.setDescription('Replies with Pong!');
+
+// Optional: Add more localization descriptions for the command itself
+pong.setLocalizationDescription({
+    [Locale.EnglishUS]: 'Replies with Pong!',
+    [Locale.SpanishLATAM]: 'Responde con Pong!',
+});
+
+// Set the executor function
+pong.setExecute(async ({ interaction, locale }) => {
+    await interaction.reply(locale['response']);
+});
+
+module.exports = RegisterCommand(pong)
 ```
 
 In your main file, you can load the commands and register their executors with your Discord client.

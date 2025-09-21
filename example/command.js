@@ -1,49 +1,31 @@
 /**
  * Modular Command Example
  * @description This is an example of a modular command using the js-discord-modularcommand library,
- * @license MIT
  */
 
-/**
- * Imports
- */
+const { ModularCommand, RegisterCommand } = require("js-discord-modularcommand");
+const { Locale } = require("discord.js");
 
-const { Locale } = require('discord.js');
-const { ModularCommand, RegisterCommand } = require('../src/index');
+const pong = new ModularCommand('pong');
 
-
-/**
- * Localization
- */
-
-const LOCALIZATION = {
+pong.setLocalizationPhrases({
     [Locale.EnglishUS]: {
-        'description': 'Replies with Pong!',
-        'reply': 'Pong!',
+        description: 'Replies with Pong!',
     },
     [Locale.SpanishLATAM]: {
-        'description': 'Responde con Pong!',
-        'reply': '¡Pong!',
-    },
-}
-
-
-/**
- * Command
- */
-
-const command = new ModularCommand('pong');
-
-command.setDescription(LOCALIZATION[Locale.EnglishUS]['description']);
-
-command.setExecute(async ({ interaction, locale }) => {
-    await interaction.reply({
-        content: locale['reply'],
-    });
+        description: 'Responde con Pong!',
+    }
 });
 
-/**
- * Export
- */
+pong.setLocalizationDescription({
+    [Locale.EnglishUS]: 'Replies with Pong!',
+    [Locale.SpanishLATAM]: 'Responde con Pong!',
+});
 
-module.exports = RegisterCommand([command]);
+pong.setDescription('Replies with Pong!');
+
+pong.setExecute(async ({ interaction }) => {
+    await interaction.reply('Pong!');
+});
+
+module.exports = RegisterCommand(pong)
