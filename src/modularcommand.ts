@@ -10,7 +10,6 @@
 
 import {
     LocalizationMap,
-    ButtonStyle,
     Locale,
 } from 'discord.js';
 
@@ -72,7 +71,7 @@ export default class ModularCommand {
     /** (Optional) The function to handle modal submissions. */
     public modalExecute?: ModalExecuteFunction;
     /** A record of handlers for specific component custom IDs. */
-    public customIdHandlers: Record<string, CommandExecuteFunction>;
+    public customIdHandlers: Record<string, CommandExecuteFunction | ButtonExecuteFunction | ModalExecuteFunction>;
 
     // Configuration
     /** The command's cooldown time in seconds. */
@@ -234,10 +233,10 @@ export default class ModularCommand {
     /**
      * Adds a custom ID handler for the command.
      * @param {string} customId The custom ID to match.
-     * @param {CommandExecuteFunction} handlerFunction The function to execute when the custom ID matches.
+     * @param {CommandExecuteFunction | ButtonExecuteFunction | ModalExecuteFunction} handlerFunction The function to execute when the custom ID matches.
      * @returns {ModularCommand} The command instance for chaining.
      */
-    addCustomIDHandler(customId: string, handlerFunction: CommandExecuteFunction): this {
+    addCustomIDHandler(customId: string, handlerFunction: CommandExecuteFunction | ButtonExecuteFunction | ModalExecuteFunction): this {
         this.customIdHandlers[customId] = handlerFunction;
         return this;
     }
@@ -256,13 +255,16 @@ export default class ModularCommand {
     /**
      * Creates a new button for the command.
      * @param {string} customId The custom ID for the button.
-     * @param {ButtonStyle} style The style of the button.
+     * @param {ButtonExecuteFunction} execute The function to execute when the button is clicked.
      * @return {ModularButton} The created button instance.
      */
-    addButton(customId: string, style: ButtonStyle): ModularButton {
-        const button = new ModularButton(customId, style);
+    addButton(customId: string, execute: ButtonExecuteFunction): ModularButton {
+        const button = new ModularButton(customId);
         this.buttons.set(customId, button);
         this.buttonsArray.push(button);
+
+        this.addCustomIDHandler(customId, execute);
+
         return button;
     }
 }

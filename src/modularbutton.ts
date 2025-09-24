@@ -22,24 +22,27 @@ export default class ModularButton {
     public customId: string;
     /** The visual style of the button. */
     public style: ButtonStyle;
-    /** The function to execute when the button is clicked. */
+    /**
+     * @deprecated This property is deprecated and will be removed in future versions.
+     * Use other mechanisms to handle button interactions.
+     */
     public execute: ButtonExecuteFunction = async () => { };
 
     /**
      * @description Creates a new ModularButton instance.
      * @param {string} customId The custom ID for the button. This should be unique within the context of a message.
-     * @param {ButtonStyle} style The visual style of the button.
      */
-    constructor(customId: string, style: ButtonStyle) {
+    constructor(customId: string) {
         this.buttonObject = new ButtonBuilder()
             .setCustomId(customId)
-            .setStyle(style);
 
         this.customId = customId;
-        this.style = style;
+        this.style = ButtonStyle.Primary;
     }
 
     /**
+     * @deprecated This method is deprecated and will be removed in future versions.
+     * Use other mechanisms to handle button interactions.
      * @description Sets the execution function for the button's click event.
      * @param {ButtonExecuteFunction} executeFunction The function to run when the button is interacted with.
      * @returns {this} The current ModularButton instance for method chaining.

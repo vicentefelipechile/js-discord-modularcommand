@@ -4,7 +4,7 @@
  * @license MIT
  */
 
-import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
+import { ActionRowBuilder, ModalBuilder, TextInputBuilder } from "discord.js";
 import { LocaleKey, ModalExecuteFunction } from "./types";
 import ModularCommand from "./modularcommand";
 
@@ -56,13 +56,11 @@ export default class ModularModal {
     /**
      * @description Creates a new text input component and adds it to the modal.
      * @param {string} id The custom ID for the text input.
-     * @param {TextInputStyle} style The visual style of the text input.
      * @returns {TextInputBuilder} The created text input instance.
      */
-    newTextInput(id: string, style: TextInputStyle): TextInputBuilder {
+    newTextInput(id: string): TextInputBuilder {
         const textInput = new TextInputBuilder()
-            .setCustomId(id)
-            .setStyle(style);
+            .setCustomId(id);
 
         this.modalInputs.set(id, textInput);
 
