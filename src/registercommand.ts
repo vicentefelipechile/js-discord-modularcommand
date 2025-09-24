@@ -25,18 +25,19 @@ import ModularCommand from "./modularcommand";
 // Helper Functions
 // =================================================================================================
 
-type CommandLocale = Partial<Record<Locale, string>> & { [Locale.EnglishUS]: string };
+type LocalizationMap = Record<string, Record<string, string>>;
+type LocalizationPhrases = Record<string, string>;
 
 /**
  * @description Gets the appropriate localization object for a command based on the interaction's locale.
  * Falls back to EnglishUS if the target locale is not available.
  * @param {ModularCommand} command The command instance.
  * @param {Interaction} interaction The interaction object to get the locale from.
- * @returns {CommandLocale} The resolved locale object.
+ * @returns {LocalizationPhrases} The resolved locale object.
  * @throws {Error} If the EnglishUS localization is missing when at least one localization is defined.
  */
-function getCommandLocale(command: ModularCommand, interaction: Interaction | MessageComponentInteraction): Partial<CommandLocale> {
-    const localeTable = command.localizationPhrases;
+function getCommandLocale(command: ModularCommand, interaction: Interaction | MessageComponentInteraction): LocalizationPhrases {
+    const localeTable = command.localizationPhrases as LocalizationMap;
 
     if (!localeTable || Object.keys(localeTable).length === 0) {
         return {};
@@ -46,8 +47,13 @@ function getCommandLocale(command: ModularCommand, interaction: Interaction | Me
         throw new Error(`Missing localization for EnglishUS in command ${command.name}`);
     }
 
-    const targetLocale = localeTable[interaction.locale] ? interaction.locale : Locale.EnglishUS;
-    return { [targetLocale]: localeTable[targetLocale] };
+    let phrases = localeTable[interaction.locale];
+
+    if (!phrases) {
+        phrases = localeTable[Locale.EnglishUS];
+    }
+
+    return phrases;
 }
 
 
