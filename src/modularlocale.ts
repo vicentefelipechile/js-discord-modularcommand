@@ -359,6 +359,8 @@ const LOCALE_DELAY = {
         .setPhraseOnlyMinutes('Bạn phải đợi {minutes} trước khi sử dụng lại lệnh này.')
 };
 
+Object.freeze(LOCALE_DELAY);
+
 export default LOCALE_DELAY;
 export {
     LOCALE_DELAY,
