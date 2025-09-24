@@ -33,7 +33,7 @@ PingCommand.setPermissionCheck(async ({ interaction }) => {
 });
 
 // Optional: Localization to use with 'locale'
-pong.setLocalizationPhrases({
+PingCommand.setLocalizationPhrases({
     [Locale.EnglishUS]: {
         response: 'Replies with Pong!',
     },
@@ -42,21 +42,24 @@ pong.setLocalizationPhrases({
     }
 });
 
+// Optional: Set a cooldown (in seconds) by default is 3 seconds
+PingCommand.setCooldown(5);
+
 // Set the command's description
-pong.setDescription('Replies with Pong!');
+PingCommand.setDescription('Replies with Pong!');
 
 // Optional: Add more localization descriptions for the command itself
-pong.setLocalizationDescription({
+PingCommand.setLocalizationDescription({
     [Locale.EnglishUS]: 'Replies with Pong!',
     [Locale.SpanishLATAM]: 'Responde con Pong!',
 });
 
 // Set the executor function
-pong.setExecute(async ({ interaction, locale }) => {
+PingCommand.setExecute(async ({ interaction, locale }) => {
     await interaction.reply(locale['response']);
 });
 
-module.exports = RegisterCommand(pong)
+module.exports = RegisterCommand(PingCommand)
 ```
 
 In your main file, you can load the commands and register their executors with your Discord client.
