@@ -16,6 +16,29 @@ kickCommand.setLocalizationDescription({
     [Locale.SpanishLATAM]: "Expulsa a un usuario del servidor",
 })
 
+kickCommand.setLocalizationOptions({
+    [Locale.EnglishUS]: {
+        user: "The user to kick",
+    },
+    [Locale.SpanishLATAM]: {
+        user: "El usuario a expulsar",
+    }
+});
+
+kickCommand.setLocalizationPhrases({
+    [Locale.EnglishUS]: {
+        userNotFound: "User not found in this server.",
+        userKicked: "User {user} has been kicked.",
+        kickFailed: "Failed to kick user.",
+    },
+    [Locale.SpanishLATAM]: {
+        userNotFound: "Usuario no encontrado en este servidor.",
+        userKicked: "El usuario {user} ha sido expulsado.",
+        kickFailed: "No se pudo expulsar al usuario.",
+    }
+});
+        
+
 kickCommand.setPermissionCheck(({ interaction }) => {
     // Only allow users with the KickMembers permission to use this command
     return interaction.member.permissions.has(PermissionFlagsBits.KickMembers);
@@ -33,7 +56,7 @@ kickCommand.setExecute(async ({ interaction, args, locale }) => {
     const member = interaction.guild.members.cache.get(user.id);
     if (!member) {
         await interaction.reply({
-            content: "User not found in this server.",
+            content: locale['userNotFound'],
             flags: MessageFlags.Ephemeral
         });
         return;
@@ -42,11 +65,11 @@ kickCommand.setExecute(async ({ interaction, args, locale }) => {
     try {
         await member.kick();
         await interaction.reply({
-            content: `User ${user.tag} has been kicked.`,
+            content: locale['userKicked'].replace("{user}", user.tag),
         });
     } catch (err) {
         await interaction.reply({
-            content: "Failed to kick user.",
+            content: locale['kickFailed'],
             flags: MessageFlags.Ephemeral
         });
         console.error(err);
