@@ -22,10 +22,7 @@ export default class ModularButton {
     public customId: string;
     /** The visual style of the button. */
     public style: ButtonStyle;
-    /**
-     * @deprecated This property is deprecated and will be removed in future versions.
-     * Use other mechanisms to handle button interactions.
-     */
+    /** Use other mechanisms to handle button interactions. */
     public execute: ButtonExecuteFunction = async () => { };
 
     /**

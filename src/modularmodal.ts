@@ -21,7 +21,10 @@ export default class ModularModal {
     public modalObject: ModalBuilder;
     /** The unique custom ID for the modal, formatted as `${command.name}_${modalId}`. */
     public customId: string;
-    /** The base ID for the modal, used for localization. */
+    /**
+     * @deprecated This property is deprecated and will be removed in future versions.
+     * The base ID for the modal, used for localization.
+     */
     public modalId: string;
     /** A map to store the text input components of the modal. */
     public modalInputs: Map<string, TextInputBuilder>;
@@ -36,7 +39,7 @@ export default class ModularModal {
      * @param {ModularCommand} command The command that this modal is associated with.
      */
     constructor(modalId: string, command: ModularCommand) {
-        this.customId = `${command.name}_${modalId}`;
+        this.customId = modalId;
         this.modalId = modalId;
         this.command = command;
         this.modalObject = new ModalBuilder().setCustomId(this.customId);
