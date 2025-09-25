@@ -259,11 +259,10 @@ export default class ModularCommand {
      * @return {ModularButton} The created button instance.
      */
     addButton(customId: string, execute: ButtonExecuteFunction): ModularButton {
-        const button = new ModularButton(customId);
+        const button = new ModularButton(customId, this);
+        button.setExecute(execute);
         this.buttons.set(customId, button);
         this.buttonsArray.push(button);
-
-        this.addCustomIDHandler(customId, execute);
 
         return button;
     }

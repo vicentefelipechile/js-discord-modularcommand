@@ -137,7 +137,7 @@ function createModalExecutor(command: ModularCommand) {
     if (command.modals.size === 0) return undefined;
 
     return async (interaction: ModalSubmitInteraction): Promise<void> => {
-        const modalObject = command.modals.get(interaction.customId);
+        const modalObject = command.modals.get(interaction.customId.split('_')[1]);
         if (!modalObject) return;
 
         const args: Record<string, string> = {};
@@ -163,7 +163,7 @@ function createButtonExecutor(command: ModularCommand) {
     if (command.buttons.size === 0) return undefined;
 
     return async (interaction: ButtonInteraction): Promise<void> => {
-        const buttonObject = command.buttons.get(interaction.customId);
+        const buttonObject = command.buttons.get(interaction.customId.split('_')[1]);
         if (!buttonObject) return;
 
         await buttonObject.execute({
