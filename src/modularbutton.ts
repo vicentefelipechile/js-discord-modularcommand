@@ -4,8 +4,8 @@
  * @license MIT
  */
 
-import { ButtonBuilder, ButtonStyle } from "discord.js";
-import { ButtonExecuteFunction } from "./types";
+import { ButtonBuilder } from "discord.js";
+import { ButtonExecuteFunction, LocaleKey } from "./types";
 import ModularCommand from "./modularcommand";
 
 // =================================================================================================
@@ -23,8 +23,8 @@ export default class ModularButton {
     public customId: string;
     /** The base ID for the button, used for localization. */
     public buttonId: string;
-    /** The visual style of the button. */
-    public style: ButtonStyle;
+    /** The command instance to which this modal belongs. */
+    public command: ModularCommand;
     /** Use other mechanisms to handle button interactions. */
     public execute: ButtonExecuteFunction = async () => { };
 
@@ -36,9 +36,9 @@ export default class ModularButton {
         this.buttonObject = new ButtonBuilder()
             .setCustomId(`${command.name}_${customId}`)
 
+        this.command = command;
         this.customId = `${command.name}_${customId}`;
         this.buttonId = customId;
-        this.style = ButtonStyle.Primary;
     }
 
     /**
@@ -50,6 +50,14 @@ export default class ModularButton {
     }
 
     /**
+     * @description Retrieves the custom ID of the button.
+     * @returns {string} The custom ID of the button.
+     */
+    getCustomId(): string {
+        return this.customId;
+    }
+
+    /**
      * @description Sets the execution function for the button's click event.
      * @param {ButtonExecuteFunction} executeFunction The function to run when the button is interacted with.
      * @returns {this} The current ModularButton instance for method chaining.
@@ -57,5 +65,16 @@ export default class ModularButton {
     setExecute(executeFunction: ButtonExecuteFunction): this {
         this.execute = executeFunction;
         return this;
+    }
+
+    /**
+     * @description Builds the button with localized label.
+     * @param {LocaleKey} locale The locale object containing localized strings.
+     * @returns {ButtonBuilder} The built ButtonBuilder instance with localized label.
+     */
+    build(locale: LocaleKey): ButtonBuilder {
+        this.buttonObject.setLabel(locale[`${this.command.name}.${this.buttonId}`]);
+
+        return this.buttonObject;
     }
 }

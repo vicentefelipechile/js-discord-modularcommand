@@ -52,6 +52,14 @@ export default class ModularModal {
     }
 
     /**
+     * @description Retrieves the custom ID of the modal.
+     * @returns {string} The custom ID of the modal.
+     */
+    getCustomId(): string {
+        return this.customId;
+    }
+
+    /**
      * @description Sets the execution function for the modal's submission event.
      * @param {ModalExecuteFunction} executeFunction The function to run when the modal is submitted.
      * @returns {this} The current ModularModal instance for method chaining.
