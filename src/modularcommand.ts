@@ -15,6 +15,7 @@ import {
 
 import ModularModal from './modularmodal.js';
 import ModularButton from './modularbutton.js';
+import ModularSelectMenu from './modularselectmenu.js'; // <- ADD THIS
 import { 
     ButtonExecuteFunction, 
     CommandExecuteFunction, 
@@ -22,6 +23,7 @@ import {
     ComponentExecuteFunction, 
     ModalExecuteFunction, 
     PermissionCheckFunction,
+    SelectMenuExecuteFunction, // <- ADD THIS
 } from './types.js';
 
 // =================================================================================================
@@ -71,7 +73,7 @@ export default class ModularCommand {
     /** (Optional) The function to handle modal submissions. */
     public modalExecute?: ModalExecuteFunction;
     /** A record of handlers for specific component custom IDs. */
-    public customIdHandlers: Record<string, CommandExecuteFunction | ButtonExecuteFunction | ModalExecuteFunction>;
+    public customIdHandlers: Record<string, CommandExecuteFunction | ButtonExecuteFunction | ModalExecuteFunction | SelectMenuExecuteFunction>;
 
     // Configuration
     /** The command's cooldown time in seconds. */
@@ -92,6 +94,10 @@ export default class ModularCommand {
     public buttons: Map<string, ModularButton>;
     /** An array containing all ModularButton instances for easy access. */
     public buttonsArray: ModularButton[];
+    /** A map of select menus associated with this command, keyed by the select menu's custom ID. */
+    public selectMenus: Map<string, ModularSelectMenu>;
+    /** An array containing all ModularSelectMenu instances for easy access. */
+    public selectMenusArray: ModularSelectMenu[];
 
     constructor(name: string) {
         this.name = name;
@@ -105,7 +111,9 @@ export default class ModularCommand {
         this.cooldown = 3;
         this.modals = new Map();
         this.buttons = new Map();
+        this.selectMenus = new Map(); // <- ADD THIS
         this.buttonsArray = [];
+        this.selectMenusArray = []; // <- ADD THIS
         this.isNSFW = false;
     }
 
@@ -158,7 +166,6 @@ export default class ModularCommand {
 
     /**
      * Sets the localization phrases for the command.
-     * Accepts a partial record, so not all locales need to be provided.
      * @param {LocalizationMap} localizationPhrases The localization phrases.
      * @returns {ModularCommand} The command instance for chaining.
      */
@@ -233,10 +240,10 @@ export default class ModularCommand {
     /**
      * Adds a custom ID handler for the command.
      * @param {string} customId The custom ID to match.
-     * @param {CommandExecuteFunction | ButtonExecuteFunction | ModalExecuteFunction} handlerFunction The function to execute when the custom ID matches.
+     * @param {CommandExecuteFunction | ButtonExecuteFunction | ModalExecuteFunction | SelectMenuExecuteFunction} handlerFunction The function to execute when the custom ID matches.
      * @returns {ModularCommand} The command instance for chaining.
      */
-    addCustomIDHandler(customId: string, handlerFunction: CommandExecuteFunction | ButtonExecuteFunction | ModalExecuteFunction): this {
+    addCustomIDHandler(customId: string, handlerFunction: CommandExecuteFunction | ButtonExecuteFunction | ModalExecuteFunction | SelectMenuExecuteFunction): this {
         this.customIdHandlers[customId] = handlerFunction;
         return this;
     }
@@ -265,5 +272,17 @@ export default class ModularCommand {
         this.buttonsArray.push(button);
 
         return button;
+    }
+
+    /**
+     * Creates a new select menu for the command.
+     * @param {string} selectMenuId The ID for the select menu.
+     * @returns {ModularSelectMenu} The created select menu instance.
+     */
+    addSelectMenu(selectMenuId: string): ModularSelectMenu {
+        const menu = new ModularSelectMenu(selectMenuId, this);
+        this.selectMenus.set(selectMenuId, menu);
+        this.selectMenusArray.push(menu);
+        return menu;
     }
 }

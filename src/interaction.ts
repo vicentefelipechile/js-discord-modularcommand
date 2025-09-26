@@ -36,7 +36,7 @@ type InteractionHandler = (args: InteractionHandlerArgs) => Promise<boolean | un
  * @description Creates a modular command handler function for the Discord client.
  * @param {ClientWithCommands} client The Discord client instance with a commands collection.
  * @param {InteractionHandler} customHandler A custom function to handle interactions before the default logic.
- * @returns {(interaction: BaseInteraction) = Promise<void>} The main interaction handler function.
+ * @returns {(interaction: BaseInteraction) => Promise<void>} The main interaction handler function.
  */
 
 export default function ModularCommandHandler(client: ClientWithCommands, customHandler: InteractionHandler): (interaction: BaseInteraction) => Promise<void> {
@@ -63,11 +63,14 @@ export default function ModularCommandHandler(client: ClientWithCommands, custom
         } else if (interaction.customId) {
             commandName = interaction.customId.split('_')[0];
         } else {
-            const errorMessage = LOCALE_ERROR[interaction.locale];
+            const errorMessage = LOCALE_ERROR[interaction.locale] || 'An unexpected error occurred.';
             if (interaction.replied || interaction.deferred) {
                 await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
             } else {
-                await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+                // Type guard to ensure reply method exists
+                if ('reply' in interaction) {
+                    await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+                }
             }
             console.error(`Interaction does not have a commandName or customId: ${interaction.id}`);
             return;
@@ -84,17 +87,21 @@ export default function ModularCommandHandler(client: ClientWithCommands, custom
                 await command.execute(interaction);
             } else if (interaction.isButton() && command.buttonExecute) {
                 await command.buttonExecute(interaction);
+            } else if (interaction.isStringSelectMenu() && command.selectMenuExecute) {
+                await command.selectMenuExecute(interaction);
             } else if (interaction.isMessageComponent() && command.componentExecute) {
                 await command.componentExecute(interaction);
             } else if (interaction.isModalSubmit() && command.modalExecute) {
                 await command.modalExecute(interaction);
             }
         } catch (error) {
-            const errorMessage = LOCALE_ERROR[interaction.locale];
-            if (interaction.replied || interaction.deferred) {
+            const errorMessage = LOCALE_ERROR[interaction.locale] || 'An unexpected error occurred.';
+             if (interaction.replied || interaction.deferred) {
                 await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
             } else {
-                await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+                 if ('reply' in interaction) {
+                    await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+                }
             }
             console.error(`Error handling interaction: ${interaction.id}`, error);
         }

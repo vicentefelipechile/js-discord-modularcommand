@@ -10,6 +10,7 @@ import {
     ChatInputCommandInteraction,
     MessageComponentInteraction,
     ModalSubmitInteraction,
+    StringSelectMenuInteraction,
     CommandInteraction,
     ButtonInteraction,
     SlashCommandBuilder,
@@ -60,6 +61,8 @@ export interface CommandData {
     modalExecute?: (interaction: ModalSubmitInteraction) => Promise<void>;
     /** (Optional) Function to handle button interactions. */
     buttonExecute?: (interaction: ButtonInteraction) => Promise<void>;
+    /** (Optional) Function to handle string select menu interactions. */
+    selectMenuExecute?: (interaction: StringSelectMenuInteraction) => Promise<void>;
     /** The command's cooldown time in seconds. */
     cooldown: number;
 }
@@ -159,6 +162,17 @@ export type ModalExecuteParams = BaseExecuteParams<ModalSubmitInteraction> & {
     args: Record<string, string>;
 };
 
+/**
+ * @type SelectMenuExecuteParams
+ * @description Parameters for the execution function of a select menu.
+ */
+export type SelectMenuExecuteParams = BaseExecuteParams<StringSelectMenuInteraction> & {
+    /** The message to which the select menu is attached. */
+    message: Message;
+    /** The value selected by the user. */
+    selected: string;
+};
+
 // =================================================================================================
 // Execution Function Types
 // =================================================================================================
@@ -186,6 +200,13 @@ export type ButtonExecuteFunction = (params: ButtonExecuteParams) => Promise<voi
  * @description Defines the signature for the function that handles a modal submission.
  */
 export type ModalExecuteFunction = (params: ModalExecuteParams) => Promise<void>;
+
+/**
+ * @type SelectMenuExecuteFunction
+ * @description Defines the signature for the function that handles select menu interactions.
+ */
+export type SelectMenuExecuteFunction = (params: SelectMenuExecuteParams) => Promise<void>;
+
 
 /**
  * @type PermissionCheckFunction

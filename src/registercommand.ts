@@ -10,6 +10,7 @@ import {
     MessageComponentInteraction,
     ModalSubmitInteraction,
     ButtonInteraction,
+    StringSelectMenuInteraction,
     SlashCommandBuilder,
     Locale,
     MessageFlags,
@@ -175,6 +176,29 @@ function createButtonExecutor(command: ModularCommand) {
     };
 }
 
+/**
+ * @description Creates the execution function for select menu interactions.
+ * @param {ModularCommand} command The command to create the executor for.
+ * @returns {Function|undefined} The async function or undefined if not needed.
+ */
+function createSelectMenuExecutor(command: ModularCommand) {
+    if (command.selectMenus.size === 0) return undefined;
+
+    return async (interaction: StringSelectMenuInteraction): Promise<void> => {
+        const menuObject = command.selectMenus.get(interaction.customId.split('_')[1]);
+        if (!menuObject) return;
+
+        // The user's selected option value is abstracted into `selected`.
+        await menuObject.execute({
+            interaction,
+            command,
+            locale: getCommandLocale(command, interaction),
+            message: interaction.message,
+            selected: interaction.values[0],
+        });
+    };
+}
+
 
 // =================================================================================================
 // Main Registration Function
@@ -183,7 +207,7 @@ function createButtonExecutor(command: ModularCommand) {
 /**
  * @description Registers an array of modular commands, building their final `CommandData` objects.
  * This function processes the command definitions, sets up command builders, and assigns the execution logic.
- * @param {ModularCommand[]} commands An array of ModularCommand instances.
+ * @param {ModularCommand[] | ModularCommand} commands An array of or a single ModularCommand instance.
  * @returns {CommandData[]} An array of command data objects ready for the Discord.js client.
  */
 export default function RegisterCommand(commands: ModularCommand[] | ModularCommand): CommandData[] {
@@ -245,6 +269,7 @@ export default function RegisterCommand(commands: ModularCommand[] | ModularComm
             componentExecute: createComponentExecutor(command),
             modalExecute: createModalExecutor(command),
             buttonExecute: createButtonExecutor(command),
+            selectMenuExecute: createSelectMenuExecutor(command),
             cooldown: command.cooldown,
         };
     });
