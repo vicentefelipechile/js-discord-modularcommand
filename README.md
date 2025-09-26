@@ -1,69 +1,286 @@
-# JS Discord ModularCommand
+# Discord.js Modular Command
 
-A module to create and manage modular commands in a simple way for Discord.js bots.
+[![npm version](https://img.shields.io/npm/v/js-discord-modularcommand.svg?style=flat-square)](https://www.npmjs.com/package/js-discord-modularcommand)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
-## What is it for?
+A powerful and elegant library for creating modular, feature-rich slash commands for your [Discord.js](https://discord.js.org/) bot.
 
-This library simplifies the creation and management of slash commands for [Discord.js](https://discord.js.org/). It allows you to structure your commands in a modular way, making it easier to handle logic, permissions, cooldowns, localizations, and interactive components like buttons and modals.
+`js-discord-modularcommand` simplifies command management by providing a clean, chainable structure for defining commands, handling interactions, and managing localizations. Move away from boilerplate code and focus on what truly matters: your bot's logic.
 
-## How to use it?
+## Features
 
-First, install the package in your project:
+-   **Modular by Design:** Structure each command in its own file for a clean and scalable project architecture.
+-   **Effortless Localization:** Built-in support for multiple languages for command descriptions, options, and in-command responses.
+-   **Interactive Components Made Easy:** Fluent builders for creating and managing Buttons, Modals, and Select Menus with their own handlers, all within the command's context.
+-   **Chainable Configuration:** Use a fluent, chainable API to configure every aspect of your command, from descriptions and options to permissions and cooldowns.
+-   **Simplified Handlers:** The library abstracts away the complexity of handling different interaction types. You just provide the logic.
+
+## Installation
+
+Install the package using npm or your favorite package manager:
 
 ```sh
-npm install js-discord-modularcommand@latest
+npm install js-discord-modularcommand
 ```
 
-Then, you can create your commands in a modular fashion. Here is a basic example of a `ping` command:
+## Getting Started
+
+The core of the library is the `ModularCommand` class. You create an instance of it for each command and chain methods to configure it.
+
+Here is a basic example of a `ping` command:
 
 ```javascript
-// filepath: commands/ping.js
+// filepath: /commands/ping.js
 const { ModularCommand, RegisterCommand } = require('js-discord-modularcommand');
-const { PermissionFlagsBits, Locale } = require('discord.js');
+const { Locale } = require('discord.js');
 
-// Create a new command instance
-const PingCommand = new ModularCommand('ping');
+// 1. Create a new command instance
+const pingCommand = new ModularCommand('ping');
 
-// Set the description
-PingCommand.setDescription('Sends a ping message!');
+// 2. Configure the command using chainable methods
+pingCommand.setDescription('Replies with Pong!')
 
-// Optional: Add a permission check
-PingCommand.setPermissionCheck(async ({ interaction }) => {
-    return interaction.member.permissions.has(PermissionFlagsBits.Administrator);
-});
+// Optional: Set a 5-second cooldown
+pingCommand.setCooldown(5)
 
-// Optional: Localization to use with 'locale'
-PingCommand.setLocalizationPhrases({
+// Optional: Add localized descriptions for the command itself
+pingCommand.setLocalizationDescription({
+    [Locale.EnglishUS]: 'Replies with Pong!',
+    [Locale.SpanishLATAM]: '¡Responde con Pong!',
+})
+
+// Optional: Define response phrases for different languages
+pingCommand.setLocalizationPhrases({
     [Locale.EnglishUS]: {
-        response: 'Replies with Pong!',
+        'pong_reply': 'Pong! 🏓',
     },
     [Locale.SpanishLATAM]: {
-        response: 'Responde con Pong!',
+        'pong_reply': '¡Pong! 🏓',
+    }
+})
+
+// 3. Define the execution logic
+// The 'locale' object contains the phrases for the user's language
+pingCommand.setExecute(async ({ interaction, locale }) => {
+    await interaction.reply({
+        content: locale['pong_reply']
+    });
+});
+
+// 4. Export the command for the handler
+module.exports = RegisterCommand(pingCommand);
+```
+
+## Advanced Usage: Interactive Components
+
+Easily add interactive components to your commands.
+
+### Buttons
+
+Create buttons and attach specific logic to each one.
+
+```javascript
+// filepath: /commands/vote.js
+const { ModularCommand, RegisterCommand } = require('js-discord-modularcommand');
+const { ButtonStyle, Locale, MessageFlags } = require('discord.js');
+const { ActionRowBuilder } = require('@discordjs/builders');
+
+const voteCommand = new ModularCommand('votecommand');
+
+voteCommand.setDescription('Starts a simple poll.');
+
+voteCommand.setLocalizationPhrases({
+    [Locale.EnglishUS]: {
+        'poll_question': 'What is your favorite color?',
+        'votecommand.yes': 'Green',
+        'votecommand.no': 'Blue',
+        'reply.yes': 'You voted for Green!',
+        'reply.no': 'You voted for Blue!',
+    },
+    [Locale.SpanishLATAM]: {
+        'poll_question': '¿Cuál es tu color favorito?',
+        'votecommand.yes': 'Verde',
+        'votecommand.no': 'Azul',
+        'reply.yes': '¡Has votado por el Verde!',
+        'reply.no': '¡Has votado por el Azul!',
     }
 });
 
-// Optional: Set a cooldown (in seconds) by default is 3 seconds
-PingCommand.setCooldown(5);
-
-// Set the command's description
-PingCommand.setDescription('Replies with Pong!');
-
-// Optional: Add more localization descriptions for the command itself
-PingCommand.setLocalizationDescription({
-    [Locale.EnglishUS]: 'Replies with Pong!',
-    [Locale.SpanishLATAM]: 'Responde con Pong!',
+// Create and handle the "Yes" button
+const yesButton = voteCommand.addButton('yes', async ({ interaction, locale }) => {
+    await interaction.reply({
+        content: locale['reply.yes'],
+        flags: MessageFlags.Ephemeral
+    });
 });
 
-// Set the executor function
-PingCommand.setExecute(async ({ interaction, locale }) => {
-    await interaction.reply(locale['response']);
+// Create and handle the "No" button
+const noButton = voteCommand.addButton('no', async ({ interaction, locale }) => {
+    await interaction.reply({
+        content: locale['reply.no'],
+        flags: MessageFlags.Ephemeral
+    });
 });
 
-module.exports = RegisterCommand(PingCommand)
+// Customize the underlying discord.js button
+yesButton.getButton().setStyle(ButtonStyle.Success);
+noButton.getButton().setStyle(ButtonStyle.Primary);
+
+// Main command execution: sends the message with the buttons
+voteCommand.setExecute(async ({ interaction, locale }) => {
+    const row = new ActionRowBuilder();
+
+    row.addComponents(
+        yesButton.build(locale), // .build(locale) applies the correct localization
+        noButton.build(locale)
+    );
+
+    await interaction.reply({
+        content: locale['poll_question'],
+        components: [row]
+    });
+});
+
+module.exports = RegisterCommand(voteCommand);
 ```
 
-In your main file, you can load the commands and register their executors with your Discord client.
+### Select Menus
+
+Build and handle string select menus seamlessly.
+
+```javascript
+// filepath: /commands/starter.js
+const { ModularCommand, RegisterCommand } = require('js-discord-modularcommand');
+const { ActionRowBuilder } = require('@discordjs/builders');
+const { Locale, MessageFlags } = require('discord.js');
+
+const starterCommand = new ModularCommand('starter');
+
+starterCommand.setDescription('Choose your starter Pokémon.')
+    
+starterCommand.setLocalizationPhrases({
+    [Locale.EnglishUS]: {
+        'select_prompt': 'Please select your starter:',
+        'menuselection.placeholder': 'Make a selection!',
+        'menuselection.bulbasaur.label': 'Bulbasaur',
+        'menuselection.bulbasaur.description': 'The Seed Pokémon.',
+        'menuselection.charmander.label': 'Charmander',
+        'menuselection.charmander.description': 'The Lizard Pokémon.',
+        'menuselection.squirtle.label': 'Squirtle',
+        'menuselection.squirtle.description': 'The Tiny Turtle Pokémon.',
+        'response': 'You chose {selection}!',
+    },
+    [Locale.SpanishLATAM]: {
+        'select_prompt': 'Por favor, elige tu inicial:',
+        'menuselection.placeholder': '¡Haz una selección!',
+        'menuselection.bulbasaur.label': 'Bulbasaur',
+        'menuselection.bulbasaur.description': 'El Pokémon Semilla.',
+        'menuselection.charmander.label': 'Charmander',
+        'menuselection.charmander.description': 'El Pokémon Lagartija.',
+        'menuselection.squirtle.label': 'Squirtle',
+        'menuselection.squirtle.description': 'El Pokémon Agua.',
+        'response': '¡Elegiste a {selection}!',
+    }
+});
+
+const starterMenu = starterCommand.addSelectMenu('menuselection');
+
+// Value must match the key in localization phrases
+starterMenu.addOption('bulbasaur')
+starterMenu.addOption('charmander')
+starterMenu.addOption('squirtle')
+
+starterMenu.setExecute(async ({ interaction, selected, locale }) => {
+    // 'selected' directly gives you the value of the chosen option
+    const selectionLabel = locale[`menuselection.${selected}.label`];
+    await interaction.update({
+        content: locale['response'].replace('{selection}', selectionLabel),
+        components: [] // Remove menu after selection
+    });
+});
+
+starterCommand.setExecute(async ({ interaction, locale }) => {
+    const row = new ActionRowBuilder()
+    row.addComponents(starterMenu.build(locale));
+
+    await interaction.reply({
+        content: locale['select_prompt'],
+        components: [row],
+        flags: MessageFlags.Ephemeral
+    });
+});
+
+module.exports = RegisterCommand(starterCommand);
+```
+
+### Modals (Pop-up Forms)
+
+Display pop-up forms to collect detailed user input.
+
+```javascript
+// filepath: /commands/feedback.js
+const { ModularCommand, RegisterCommand } = require('js-discord-modularcommand');
+const { TextInputStyle, Locale, MessageFlags } = require('discord.js');
+
+const feedbackCommand = new ModularCommand('feedback');
+
+feedbackCommand.setDescription('Submit feedback about the bot.')
+
+feedbackCommand.setLocalizationPhrases({
+    [Locale.EnglishUS]: {
+        'form.title': 'Feedback Form',
+        'form.subject.label': 'Subject',
+        'form.subject.placeholder': 'e.g., Feature Request',
+        'form.message.label': 'Message',
+        'form.message.placeholder': 'Your detailed feedback here...',
+        'success_reply': 'Thank you for your feedback!',
+    },
+    [Locale.SpanishLATAM]: {
+        'form.title': 'Formulario de Comentarios',
+        'form.subject.label': 'Asunto',
+        'form.subject.placeholder': 'Ej: Solicitud de función',
+        'form.message.label': 'Mensaje',
+        'form.message.placeholder': 'Tus comentarios detallados aquí...',
+        'success_reply': '¡Gracias por tus comentarios!',
+    }
+});
+
+const feedbackModal = feedbackCommand.addModal('form');
+
+// Define text inputs
+const subjectInput = feedbackModal.newTextInput('subject')
+    .setStyle(TextInputStyle.Short)
+    .setRequired(true)
+    .data
+    .custom_id;
+
+const messageInput = feedbackModal.newTextInput('message')
+    .setStyle(TextInputStyle.Paragraph)
+    .setRequired(true)
+    .data
+    .custom_id;
+
+// This function runs when the user submits the modal
+feedbackModal.setExecute(async ({ interaction, args, locale }) => {
+    const subject = args[subjectInput];
+    const message = args[messageInput];
+
+    // Process the data
+    console.log(`New Feedback: ${subject} - ${message}`);
+    await interaction.reply({
+        content: locale['success_reply'],
+        flags: MessageFlags.Ephemeral
+    });
+});
+
+// This function runs when the /feedback command is used, showing the modal
+feedbackCommand.setExecute(async ({ interaction, locale }) => {
+    await interaction.showModal(feedbackModal.build(locale));
+});
+
+module.exports = RegisterCommand(feedbackCommand);
+```
 
 ## License
 
-This project is under the MIT License. See the [LICENSE](LICENSE) file
+This project is licensed under the MIT License. See the `LICENSE` file for details.

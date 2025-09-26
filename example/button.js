@@ -21,8 +21,8 @@ const { ModularCommand, RegisterCommand } = require("js-discord-modularcommand")
 // COMMAND INITIALIZATION
 // -----------------------------------------------------------------------------
 
-// Create a new instance of ModularCommand for the 'button' command.
-const buttonCommand = new ModularCommand('button');
+// Create a new instance of ModularCommand for the 'buttoncommand' command.
+const buttonCommand = new ModularCommand('buttoncommand');
 
 // -----------------------------------------------------------------------------
 // MAIN COMMAND CONFIGURATION
@@ -49,15 +49,15 @@ buttonCommand.setLocalizationPhrases({
         'description': 'Sends a button!',
         'reply.message': 'You clicked the button!',
         'reply.secondmessage': 'You clicked the second button!',
-        'button.clickme.label': 'Click me',
-        'button.anotherbutton.label': 'Another Button',
+        'buttoncommand.clickme': 'Click me',
+        'buttoncommand.anotherbutton': 'Another Button',
     },
     [Locale.SpanishLATAM]: {
         'description': '¡Envía un botón!',
         'reply.message': '¡Has hecho clic en el botón!',
         'reply.secondmessage': '¡Has hecho clic en el segundo botón!',
-        'button.clickme.label': 'Haz clic en mí',
-        'button.anotherbutton.label': 'Otro botón',
+        'buttoncommand.clickme': 'Haz clic en mí',
+        'buttoncommand.anotherbutton': 'Otro botón',
     }
 });
 
