@@ -1,15 +1,20 @@
 /**
- * @file Contains the structure for creating reusable button components.
- * @author vicentefelipechile
- * @license MIT
+ * @license     MIT
+ * @file        src/modularbutton.ts
+ * @author      vicentefelipechile
+ * @description A class to create and manage reusable button components in a Discord bot using Discord.js.
  */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
 
 import { ButtonBuilder } from "discord.js";
 import { ButtonExecuteFunction, LocaleKey } from "./types";
 import ModularCommand from "./modularcommand";
 
 // =================================================================================================
-// Main Class
+// ModularButton Class
 // =================================================================================================
 
 /**

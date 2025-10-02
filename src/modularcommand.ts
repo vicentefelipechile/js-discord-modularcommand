@@ -1,7 +1,8 @@
 /**
- * @file Contains the main class for creating modular commands.
- * @author vicentefelipechile
- * @license MIT
+ * @license     MIT
+ * @file        src/modularcommand.ts
+ * @author      vicentefelipechile
+ * @description Provides a modular command structure for a Discord bot using Discord.js.
  */
 
 // =================================================================================================
@@ -27,7 +28,7 @@ import {
 } from './types.js';
 
 // =================================================================================================
-// Class: ModularCommand
+// ModularCommand Class
 // =================================================================================================
 
 /**

@@ -1,10 +1,19 @@
 /**
- * @module ModularLocale
+ * @license     MIT
+ * @file        src/modularlocale.ts
+ * @author      vicentefelipechile
  * @description Generic localization phrases used throughout the application.
- * @license MIT
  */
 
+// =================================================================================================
+// Imports
+// =================================================================================================
+
 import { Locale } from "discord.js";
+
+// =================================================================================================
+// Helper Functions
+// =================================================================================================
 
 /**
  * Format a time unit (seconds or minutes) for localization.
@@ -20,6 +29,10 @@ function formatUnit(unit: 's' | 'm', unitCount: number, unitData: Record<string,
         return unitData.plural.replace(`{${unit}}`, unitCount.toString());
     }
 };
+
+// =================================================================================================
+// ModularLocale Class
+// =================================================================================================
 
 /**
  * @description Class to handle localization in a modular way.
@@ -122,6 +135,10 @@ class ModularLocale {
         return formattedPhrase.replace(/\s+/g, ' ').trim();
     }
 }
+
+// =================================================================================================
+// Localization Phrases
+// =================================================================================================
 
 /**
  * @description Localization phrases for delay commands in ModularLocale structure.
@@ -361,8 +378,8 @@ const LOCALE_DELAY = {
 
 Object.freeze(LOCALE_DELAY);
 
+// =================================================================================================
+// Export
+// =================================================================================================
+
 export default LOCALE_DELAY;
-export {
-    LOCALE_DELAY,
-    ModularLocale
-};

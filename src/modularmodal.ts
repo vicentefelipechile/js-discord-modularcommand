@@ -1,8 +1,13 @@
 /**
- * @file Contains the structure and logic for creating modular modals.
- * @author vicentefelipechile
- * @license MIT
+ * @license     MIT
+ * @file        src/modularmodal.ts
+ * @author      vicentefelipechile
+ * @description Represents a modular modal that can be dynamically created and managed.
  */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
 
 import { ActionRowBuilder, ModalBuilder, TextInputBuilder } from "discord.js";
 import { LocaleKey, ModalExecuteFunction } from "./types";

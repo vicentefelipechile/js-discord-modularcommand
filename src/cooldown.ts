@@ -1,7 +1,8 @@
 /**
- * @file Manages command cooldowns for users to prevent spam.
- * @author vicentefelipechile
- * @license MIT
+ * @license     MIT
+ * @file        src/cooldown.ts
+ * @author      vicentefelipechile
+ * @description Manages command cooldowns for users in a Discord bot using Discord.js.
  */
 
 // =================================================================================================
@@ -84,7 +85,7 @@ export default function isUserInCooldown(name: string, userId: string): Cooldown
         return { inCooldown: false, waitTime: 0 };
     }
 
-    const timePassed = (Date.now() - lastTime) / 1000; // Time passed in seconds
+    const timePassed = Math.floor((Date.now() - lastTime) / 1000); // Time passed in seconds
     const cooldownCommand = COMMAND_CONFIG.get(name);
 
     // This error indicates a developer mistake, as a command should be registered before being checked.

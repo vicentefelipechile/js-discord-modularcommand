@@ -1,12 +1,21 @@
 /**
- * @file Contains the structure and logic for creating modular select menus.
- * @author vicentefelipechile
- * @license MIT
+ * @license     MIT
+ * @file        src/modularselectmenu.ts
+ * @author      vicentefelipechile
+ * @description Represents a modular select menu that can be dynamically created and managed.
  */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
 
 import { StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from "discord.js";
 import { LocaleKey, SelectMenuExecuteFunction } from "./types";
 import ModularCommand from "./modularcommand";
+
+// =================================================================================================
+// ModularSelectMenu Class
+// =================================================================================================
 
 /**
  * @class ModularSelectMenu

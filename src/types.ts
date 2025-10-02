@@ -1,8 +1,13 @@
 /**
- * @file Contains the type and interface definitions for the Discord bot's modular commands.
- * @author vicentefelipechile
- * @license MIT
+ * @license     MIT
+ * @file        src/types.ts
+ * @author      vicentefelipechile
+ * @description Defines types and interfaces used throughout the modular command framework.
  */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
 
 import {
     ApplicationCommandOptionType as OptionType,
@@ -22,6 +27,8 @@ import {
     Locale,
     Client,
     User,
+    Role,
+    APIRole,
 } from "discord.js";
 import ModularCommand from "./modularcommand";
 
@@ -81,6 +88,7 @@ export const ALLOWED_OPTION_TYPE = [
     OptionType.Integer,
     OptionType.Number,
     OptionType.User,
+    OptionType.Role,
 ] as const;
 
 /**
@@ -116,6 +124,8 @@ export type CommandArgumentValue =
     | GuildChannel
     | ThreadChannel
     | PartialDMChannel
+    | Role
+    | APIRole
     | null;
 
 // =================================================================================================

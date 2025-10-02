@@ -1,11 +1,16 @@
 /**
- * @file Contains the generic localization phrases used throughout the application.
- * @author vicentefelipechile
- * @license MIT
+ * @license     MIT
+ * @file        src/locales.ts
+ * @author      vicentefelipechile
+ * @description Localization phrases for various command responses in a Discord bot using Discord.js.
  */
 
+// =================================================================================================
+// Imports
+// =================================================================================================
+
 import { Locale } from "discord.js";
-import LOCALE_DELAY, { ModularLocale } from "./modularlocale";
+import LOCALE_DELAY from "./modularlocale";
 
 // =================================================================================================
 // Localization Phrases
@@ -134,5 +139,4 @@ export {
     LOCALE_ERROR,
     LOCALE_FORBIDDEN,
     LOCALE_NSFW,
-    ModularLocale
 };

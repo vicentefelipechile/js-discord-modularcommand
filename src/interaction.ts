@@ -1,8 +1,13 @@
 /**
- * @file Contains the logic for handling Discord bot interactions.
- * @author vicentefelipechile
- * @license MIT
+ * @license     MIT
+ * @file        src/interaction.ts
+ * @author      vicentefelipechile
+ * @description Provides a modular command handler for a Discord bot using Discord.js.
  */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
 
 import { BaseInteraction, Collection, CommandInteraction, MessageComponentInteraction, MessageFlags, ModalSubmitInteraction } from "discord.js";
 import { LOCALE_ERROR } from "./locales";

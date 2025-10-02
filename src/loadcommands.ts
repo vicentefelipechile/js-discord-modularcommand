@@ -1,8 +1,13 @@
 /**
- * @file Contains the logic for loading modular commands into the Discord bot client.
- * @author vicentefelipechile
- * @license MIT
+ * @license     MIT
+ * @file        src/loadcommands.ts
+ * @author      vicentefelipechile
+ * @description Loads one or more commands into an array.
  */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
 
 import { CommandData } from "./types";
 
@@ -35,6 +40,14 @@ export default function LoadCommand(commandsArray: CommandData[], command: Comma
     const commands = Array.isArray(command) ? command : [command];
 
     for (const cmd of commands) {
+        if (!cmd || typeof cmd !== "object") {
+            throw new TypeError(`Invalid command provided. Expected an object but received: ${typeof cmd}`);
+        }
+
+        if (!cmd.data || typeof cmd.data.name !== "string") {
+            throw new TypeError(`Command is missing a valid 'name' property.`);
+        }
+
         if (typeof cmd.execute !== "function") {
             throw new TypeError(`Command "${cmd.data.name}" is missing a required 'execute' function.`);
         }

@@ -1,8 +1,15 @@
 /**
- * @file Contains the logic for registering modular commands and building their Discord.js data structures.
- * @author vicentefelipechile
- * @license MIT
+ * @license     MIT
+ * @file        src/registercommand.ts
+ * @author      vicentefelipechile
+ * @description This module provides functionality to register modular commands for a Discord bot using Discord.js.
+ *              It constructs command data objects, sets up execution contexts for various interaction types,
+ *              and handles localization, permissions, NSFW checks, and cooldowns.
  */
+
+// =================================================================================================
+// Imports
+// =================================================================================================
 
 import {
     ApplicationCommandOptionType as OptionType,
@@ -98,6 +105,7 @@ function createChatInputExecutor(command: ModularCommand, options: Record<string
                 case OptionType.Integer: args[optionName] = interaction.options.getInteger(optionName, false); break;
                 case OptionType.Number: args[optionName] = interaction.options.getNumber(optionName, false); break;
                 case OptionType.User: args[optionName] = interaction.options.getUser(optionName, false); break;
+                case OptionType.Role: args[optionName] = interaction.options.getRole(optionName, false); break;
                 default: throw new Error(`Unsupported option type: ${options[optionName]}`);
             }
         }
