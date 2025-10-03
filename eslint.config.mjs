@@ -11,5 +11,5 @@ export default defineConfig([
     languageOptions: { globals: globals.node },
   },
   tseslint.configs.strict,
-  globalIgnores(["node_modules/", "dist/", "example/", "eslint.config.mjs"]),
+  globalIgnores(["node_modules/", "dist/", "example/", "test/", "eslint.config.mjs"]),
 ]);

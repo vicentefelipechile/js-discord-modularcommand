@@ -1,6 +1,7 @@
 # Archivos de configuración del entorno de desarrollo
 .vscode/
 node_modules/
+test/
 
 # Archivos de prueba (si no quieres que se incluyan)
 tests/
