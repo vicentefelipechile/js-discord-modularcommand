@@ -29,6 +29,14 @@ import {
     User,
     Role,
     APIRole,
+    BaseChannel,
+    SlashCommandBooleanOption,
+    SlashCommandChannelOption,
+    SlashCommandNumberOption,
+    SlashCommandStringOption,
+    SlashCommandUserOption,
+    SlashCommandRoleOption,
+    SlashCommandIntegerOption,
 } from "discord.js";
 import ModularCommand from "./modularcommand";
 
@@ -51,6 +59,19 @@ export interface CommandOption {
     required?: boolean;
     /** An array of predefined choices the user can select from. */
     choices?: APIApplicationCommandOptionChoice[];
+}
+
+/**
+ * @interface SubCommand
+ * @description Defines the structure of a subcommand for a slash command.
+ */
+export interface SubCommand {
+    /** The name of the subcommand, must be unique within the command. */
+    name: string;
+    /** The description of the subcommand. */
+    description: string;
+    /** The options (arguments) that the subcommand accepts. */
+    options?: CommandOption[];
 }
 
 /**
@@ -89,6 +110,7 @@ export const ALLOWED_OPTION_TYPE = [
     OptionType.Number,
     OptionType.User,
     OptionType.Role,
+    OptionType.Channel,
 ] as const;
 
 /**
@@ -126,7 +148,22 @@ export type CommandArgumentValue =
     | PartialDMChannel
     | Role
     | APIRole
+    | BaseChannel
     | null;
+
+/**
+ * @type OptionBuilderType
+ * @description Represents the type of an option builder function.
+ */
+export type OptionBuilderType = 
+    | SlashCommandStringOption
+    | SlashCommandBooleanOption
+    | SlashCommandIntegerOption
+    | SlashCommandNumberOption
+    | SlashCommandUserOption
+    | SlashCommandRoleOption
+    | SlashCommandChannelOption
+
 
 // =================================================================================================
 // Function Parameter Types

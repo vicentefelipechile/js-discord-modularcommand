@@ -25,6 +25,7 @@ import {
     ModalExecuteFunction, 
     PermissionCheckFunction,
     SelectMenuExecuteFunction, // <- ADD THIS
+    SubCommand,
 } from './types.js';
 
 // =================================================================================================
@@ -63,6 +64,10 @@ export default class ModularCommand {
     public options: CommandOption[];
     /** An object containing localizations for the names and descriptions of the options. */
     public optionsLocalizations: LocalizationMap;
+    /** The subcommands that this command supports. */
+    public subCommands: SubCommand[];
+    /** An object containing localizations for subcommand names, descriptions and options. */
+    public subCommandLocalizations: LocalizationMap;
 
     // Execution Handlers
     /** The main function that executes when the command is invoked. */
@@ -108,6 +113,8 @@ export default class ModularCommand {
         this.modalExecute = undefined;
         this.options = [];
         this.optionsLocalizations = {};
+        this.subCommands = [];
+        this.subCommandLocalizations = {};
         this.customIdHandlers = {};
         this.cooldown = 3;
         this.modals = new Map();
@@ -179,6 +186,19 @@ export default class ModularCommand {
     }
 
     /**
+     * Sets the localizations for subcommands, including names, descriptions, and options.
+     * @param {LocalizationMap} localizations The subcommand localizations map.
+     * @returns {ModularCommand} The command instance for chaining.
+     */
+    setLocalizationSubCommands(localizations: LocalizationMap): this {
+        this.subCommandLocalizations = {
+            ...this.subCommandLocalizations,
+            ...localizations,
+        };
+        return this;
+    }
+
+    /**
      * Sets the execute function for the command.
      * @param {CommandExecuteFunction} executeFunction The function to execute.
      * @returns {ModularCommand} The command instance for chaining.
@@ -235,6 +255,16 @@ export default class ModularCommand {
      */
     addOption(option: CommandOption): this {
         this.options.push(option);
+        return this;
+    }
+
+    /**
+     * Adds a subcommand to the command.
+     * @param {SubCommand} subCommand The subcommand configuration.
+     * @returns {ModularCommand} The command instance for chaining.
+     */
+    addSubCommand(subCommand: SubCommand): this {
+        this.subCommands.push(subCommand);
         return this;
     }
 

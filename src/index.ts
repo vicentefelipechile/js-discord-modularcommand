@@ -1,7 +1,7 @@
 import { LOCALE_DELAY, LOCALE_ERROR, LOCALE_FORBIDDEN, LOCALE_NSFW } from "./locales";
 
 import ModularCommandHandler from "./interaction";
-import { CommandData } from "./types";
+import { CommandData, SubCommand } from "./types";
 
 import ModularModal from "./modularmodal";
 import ModularCommand from "./modularcommand";
@@ -16,6 +16,7 @@ export {
     ModularButton,
     ModularModal,
     CommandData,
+    SubCommand,
     RegisterCommand,
     LoadCommand,
     ModularCommandHandler,

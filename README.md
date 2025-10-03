@@ -281,6 +281,118 @@ feedbackCommand.setExecute(async ({ interaction, locale }) => {
 module.exports = RegisterCommand(feedbackCommand);
 ```
 
+### Subcommands
+
+Create commands with subcommands for better organization of related functionality.
+
+```javascript
+// filepath: /commands/settings.js
+const { ModularCommand, RegisterCommand } = require('js-discord-modularcommand');
+const { ApplicationCommandOptionType, PermissionFlagsBits, Locale, EmbedBuilder, Colors } = require('discord.js');
+
+const settingsCommand = new ModularCommand('settings')
+    .setDescription('Configure bot settings for this server.')
+    .setCooldown(5)
+    .setPermissionCheck((interaction) => interaction.member.permissions.has(PermissionFlagsBits.ManageGuild));
+
+// Add subcommands with their own options
+settingsCommand.addSubCommand({
+    name: 'set-prefix',
+    description: 'Set the command prefix for this server',
+    options: [
+        {
+            name: 'prefix',
+            description: 'The new prefix to use',
+            type: ApplicationCommandOptionType.String,
+            required: true
+        }
+    ]
+});
+
+settingsCommand.addSubCommand({
+    name: 'set-channel',
+    description: 'Set the default channel for bot messages',
+    options: [
+        {
+            name: 'channel',
+            description: 'The channel to use for bot messages',
+            type: ApplicationCommandOptionType.Channel,
+            required: true
+        }
+    ]
+});
+
+settingsCommand.addSubCommand({
+    name: 'view-config',
+    description: 'View current server configuration'
+});
+
+// Localize subcommands and their options
+settingsCommand.setLocalizationSubCommands({
+    [Locale.EnglishUS]: {
+        'set-prefix': 'Set Command Prefix',
+        'set-prefix.description': 'Set the command prefix for this server',
+        'set-prefix.prefix': 'Prefix',
+        'set-prefix.prefix.description': 'The new prefix to use for commands',
+        
+        'set-channel': 'Set Default Channel',
+        'set-channel.description': 'Set the default channel for bot messages',
+        'set-channel.channel': 'Channel',
+        'set-channel.channel.description': 'The channel to use for bot messages',
+        
+        'view-config': 'View Configuration',
+        'view-config.description': 'View current server configuration'
+    }
+});
+
+// Set up localized phrases
+settingsCommand.setLocalizationPhrases({
+    [Locale.EnglishUS]: {
+        'success.prefix_set': 'Command prefix has been set to `{prefix}`.',
+        'success.channel_set': 'Default channel has been set to {channel}.',
+        'config.title': 'Server Configuration - {serverName}',
+        'config.description': 'Current bot settings for this server:'
+    }
+});
+
+// Handle all subcommands in a single execute function
+settingsCommand.setExecute(async ({ interaction, locale, args }) => {
+    await interaction.deferReply();
+    
+    const subcommand = args.subcommand; // The subcommand name is automatically added to args
+    
+    switch (subcommand) {
+        case 'set-prefix':
+            const newPrefix = args.prefix;
+            // Save the prefix to your database
+            await interaction.editReply({
+                content: locale['success.prefix_set'].replace('{prefix}', newPrefix)
+            });
+            break;
+            
+        case 'set-channel':
+            const channel = args.channel;
+            // Save the channel to your database
+            await interaction.editReply({
+                content: locale['success.channel_set'].replace('{channel}', `<#${channel.id}>`)
+            });
+            break;
+            
+        case 'view-config':
+            const embed = new EmbedBuilder()
+                .setColor(Colors.Blue)
+                .setTitle(locale['config.title'].replace('{serverName}', interaction.guild.name))
+                .setDescription(locale['config.description'])
+                .setTimestamp();
+            
+            await interaction.editReply({ embeds: [embed] });
+            break;
+    }
+});
+
+module.exports = RegisterCommand(settingsCommand);
+```
+
 ## License
 
 This project is licensed under the MIT License. See the `LICENSE` file for details.

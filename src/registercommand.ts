@@ -22,11 +22,12 @@ import {
     Locale,
     MessageFlags,
     Interaction,
+    SlashCommandSubcommandBuilder,
 } from "discord.js";
 
 import isUserInCooldown, { cooldownRegister, cooldownSetUser } from "./cooldown";
 import { LOCALE_FORBIDDEN, LOCALE_NSFW, LOCALE_DELAY } from "./locales";
-import { CommandArgumentValue, CommandData } from "./types";
+import { CommandArgumentValue, CommandData, CommandOption } from "./types";
 import ModularCommand from "./modularcommand";
 
 // =================================================================================================
@@ -35,6 +36,148 @@ import ModularCommand from "./modularcommand";
 
 type LocalizationMap = Record<string, Record<string, string>>;
 type LocalizationPhrases = Record<string, string>;
+
+/**
+ * @description Gets localized description for a subcommand.
+ * @param {ModularCommand} command The command instance.
+ * @param {string} subCommandName The name of the subcommand.
+ * @param {string} defaultDescription The default description.
+ * @returns {string} The localized description.
+ */
+function getLocalizedSubCommandDescription(command: ModularCommand, subCommandName: string, defaultDescription: string): string {
+    if (!command.subCommandLocalizations) return defaultDescription;
+    
+    const localizations = command.subCommandLocalizations as Record<string, Record<string, string>>;
+    const enLocalizations = localizations[Locale.EnglishUS];
+    
+    return enLocalizations?.[`${subCommandName}.description`] || defaultDescription;
+}
+
+/**
+ * @description Gets localized description for a subcommand option.
+ * @param {ModularCommand} command The command instance.
+ * @param {string} subCommandName The name of the subcommand.
+ * @param {string} optionName The name of the option.
+ * @param {string} defaultDescription The default description.
+ * @returns {string} The localized description.
+ */
+function getLocalizedOptionDescription(command: ModularCommand, subCommandName: string, optionName: string, defaultDescription: string): string {
+    if (!command.subCommandLocalizations) return defaultDescription;
+    
+    const localizations = command.subCommandLocalizations as Record<string, Record<string, string>>;
+    const enLocalizations = localizations[Locale.EnglishUS];
+    
+    return enLocalizations?.[`${subCommandName}.${optionName}.description`] || defaultDescription;
+}
+
+/**
+ * @description Creates an option builder function with common configuration.
+ * @param {CommandOption} opt The option configuration.
+ * @param {string} description The resolved description.
+ * @returns {Function} The option builder function.
+ */
+function createOptionBuilder(opt: CommandOption, description: string) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (option: any) => {
+        option.setName(opt.name)
+            .setDescription(description)
+            .setRequired(opt.required || false)
+            .setDescriptionLocalizations(typeof opt.description === 'object' ? opt.description : {});
+
+        if (opt.choices && opt.choices.length > 0) {
+            option.addChoices(...opt.choices);
+        }
+        return option;
+    };
+}
+
+/**
+ * @description Adds an option to a command or subcommand builder based on its type.
+ * @param {any} builder The command or subcommand builder.
+ * @param {CommandOption} opt The option to add.
+ * @param {Function} optionBuilder The option builder function.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function addOptionToBuilder(builder: any, opt: CommandOption, optionBuilder: (option: any) => any): void {
+    switch (opt.type) {
+        case OptionType.String: builder.addStringOption(optionBuilder); break;
+        case OptionType.Boolean: builder.addBooleanOption(optionBuilder); break;
+        case OptionType.Integer: builder.addIntegerOption(optionBuilder); break;
+        case OptionType.Number: builder.addNumberOption(optionBuilder); break;
+        case OptionType.User: builder.addUserOption(optionBuilder); break;
+        case OptionType.Role: builder.addRoleOption(optionBuilder); break;
+        case OptionType.Channel: builder.addChannelOption(optionBuilder); break;
+        default: throw new Error(`Unsupported option type: ${opt.type}`);
+    }
+}
+
+/**
+ * @description Processes and adds subcommands to a command builder.
+ * @param {SlashCommandBuilder} commandBuilder The command builder.
+ * @param {ModularCommand} command The command instance.
+ * @param {Record<string, OptionType>} options The options record to populate.
+ */
+function processSubCommands(commandBuilder: SlashCommandBuilder, command: ModularCommand, options: Record<string, OptionType>): void {
+    if (!command.subCommands || command.subCommands.length === 0) return;
+
+    command.subCommands.forEach(subCmd => {
+        commandBuilder.addSubcommand((subcommand: SlashCommandSubcommandBuilder) => {
+            // Get localized description for subcommand
+            const subCmdDescription = getLocalizedSubCommandDescription(command, subCmd.name, subCmd.description);
+            
+            subcommand
+                .setName(subCmd.name)
+                .setDescription(subCmdDescription);
+
+            // Add options to the subcommand
+            if (subCmd.options) {
+                subCmd.options.forEach(opt => {
+                    // Get base description
+                    let description = typeof opt.description === 'string'
+                        ? opt.description
+                        : (opt.description[Locale.EnglishUS] || `The description for ${opt.name} in English.`);
+                    
+                    // Apply subcommand-specific localization
+                    description = getLocalizedOptionDescription(command, subCmd.name, opt.name, description);
+                    
+                    if (!description) {
+                        throw new Error(`Option '${opt.name}' in subcommand '${subCmd.name}' is missing a description.`);
+                    }
+
+                    options[opt.name] = opt.type;
+                    
+                    const optionBuilder = createOptionBuilder(opt, description);
+                    addOptionToBuilder(subcommand, opt, optionBuilder);
+                });
+            }
+
+            return subcommand;
+        });
+    });
+}
+
+/**
+ * @description Processes and adds regular options to a command builder.
+ * @param {SlashCommandBuilder} commandBuilder The command builder.
+ * @param {ModularCommand} command The command instance.
+ * @param {Record<string, OptionType>} options The options record to populate.
+ */
+function processRegularOptions(commandBuilder: SlashCommandBuilder, command: ModularCommand, options: Record<string, OptionType>): void {
+    command.options.forEach(opt => {
+        const description = typeof opt.description === 'string'
+            ? opt.description
+            : (opt.description[Locale.EnglishUS] || `The description for ${opt.name} in English.`);
+        
+        if (!description) {
+            throw new Error(`Option '${opt.name}' is missing a description.`);
+        }
+
+        options[opt.name] = opt.type;
+        
+        const optionBuilder = createOptionBuilder(opt, description);
+        addOptionToBuilder(commandBuilder, opt, optionBuilder);
+    });
+}
 
 /**
  * @description Gets the appropriate localization object for a command based on the interaction's locale.
@@ -98,6 +241,17 @@ function createChatInputExecutor(command: ModularCommand, options: Record<string
 
         // Argument Parsing
         const args: Record<string, CommandArgumentValue> = {};
+        
+        // Check if this command has subcommands and get the current subcommand
+        let currentSubcommand = null;
+        if (command.subCommands && command.subCommands.length > 0) {
+            try {
+                currentSubcommand = interaction.options.getSubcommand();
+            } catch {
+                throw new Error(`Subcommand not found for command ${command.name}.`);
+            }
+        }
+        
         for (const optionName of Object.keys(options)) {
             switch (options[optionName]) {
                 case OptionType.String: args[optionName] = interaction.options.getString(optionName, false); break;
@@ -106,8 +260,14 @@ function createChatInputExecutor(command: ModularCommand, options: Record<string
                 case OptionType.Number: args[optionName] = interaction.options.getNumber(optionName, false); break;
                 case OptionType.User: args[optionName] = interaction.options.getUser(optionName, false); break;
                 case OptionType.Role: args[optionName] = interaction.options.getRole(optionName, false); break;
+                case OptionType.Channel: args[optionName] = interaction.options.getChannel(optionName, false) as CommandArgumentValue; break;
                 default: throw new Error(`Unsupported option type: ${options[optionName]}`);
             }
+        }
+        
+        // Add the current subcommand to args if it exists
+        if (currentSubcommand) {
+            args['subcommand'] = currentSubcommand;
         }
 
         const locale = getCommandLocale(command, interaction);
@@ -235,40 +395,12 @@ export default function RegisterCommand(commands: ModularCommand[] | ModularComm
 
         const options: Record<string, OptionType> = {};
 
-        command.options.forEach(opt => {
-            const description =
-                typeof opt.description === 'string'
-                    ? opt.description
-                    : (opt.description[Locale.EnglishUS] || `The description for ${opt.name} in English.`);
-            
-            if (!description) {
-                throw new Error(`Option '${opt.name}' is missing a description.`);
-            }
-
-            options[opt.name] = opt.type;
-
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const optionBuilder = (option: any) => {
-                option.setName(opt.name)
-                    .setDescription(description)
-                    .setRequired(opt.required || false)
-                    .setDescriptionLocalizations(typeof opt.description === 'object' ? opt.description : {});
-
-                if (opt.choices && opt.choices.length > 0) {
-                    option.addChoices(...opt.choices);
-                }
-                return option;
-            };
-
-            switch (opt.type) {
-                case OptionType.String: commandBuilder.addStringOption(optionBuilder); break;
-                case OptionType.Boolean: commandBuilder.addBooleanOption(optionBuilder); break;
-                case OptionType.Integer: commandBuilder.addIntegerOption(optionBuilder); break;
-                case OptionType.Number: commandBuilder.addNumberOption(optionBuilder); break;
-                case OptionType.User: commandBuilder.addUserOption(optionBuilder); break;
-                default: throw new Error(`Unsupported option type: ${opt.type}`);
-            }
-        });
+        // Process subcommands or regular options
+        if (command.subCommands && command.subCommands.length > 0) {
+            processSubCommands(commandBuilder, command, options);
+        } else {
+            processRegularOptions(commandBuilder, command, options);
+        }
 
         // Assign Handlers using Constructors
         return {
