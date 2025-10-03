@@ -13,6 +13,7 @@ This directory contains practical examples demonstrating the features of the `js
 * **[`button.js`](./button.js)**: Shows how to send and handle interactive buttons.
 * **[`modal.js`](./modal.js)**: Shows how to use pop-up forms (modals) to get user input.
 * **[`selectmenu.js`](./selectmenu.js)**: Shows how to use interactive dropdown menus.
+* **[`subcommand.js`](./subcommand.js)**: Demonstrates subcommands and subcommand groups.
 
 ---
 
