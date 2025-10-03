@@ -1,17 +1,17 @@
 /**
- * @file        loadcommands.js
- * @author      vicentefelipechile
- * @version     2.4.0
  * @license     MIT
+ * @version     2.5.2
+ * @file        example/loadcommands.js
+ * @author      vicentefelipechile
  * @description This is a deployment script responsible for registering slash commands.
  * It reads all command definition files from the 'commands' directory, extracts
  * their JSON data, and sends it to the Discord API to create or update the commands.
  * This script should be run manually whenever you add, remove, or change a command's definition.
  */
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // IMPORTS & INITIAL SETUP
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // Imports the necessary modules and loads environment variables from the .env file.
 const { REST, Routes } = require("discord.js");
 const { readdirSync } = require("node:fs");
@@ -20,9 +20,9 @@ const { config } = require("dotenv");
 
 config();
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // COMMAND DISCOVERY & LOADING
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // This section finds the 'commands' directory, reads all command files, validates
 // their structure, and extracts the required JSON data for API registration.
 const commandsToDeploy = [];
@@ -43,9 +43,9 @@ for (const file of commandFiles) {
     }
 }
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // DISCORD API REGISTRATION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // Initializes the REST client and executes an async function to send the
 // collected command data to the Discord API, registering or updating them.
 const rest = new REST().setToken(process.env.DISCORD_TOKEN);

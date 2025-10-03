@@ -1,16 +1,16 @@
 /**
- * @file        bot.js
- * @author      vicentefelipechile
- * @version     2.4.0
  * @license     MIT
+ * @version     2.5.2
+ * @file        example/bot.js
+ * @author      vicentefelipechile
  * @description This is the main entry point for the Discord bot.
  * It is responsible for initializing the Discord client, loading all modular commands
  * from the 'commands' directory, registering event handlers, and connecting to Discord.
  */
 
-// -----------------------------------------------------------------------------
-// IMPORTS & INITIAL SETUP
-// -----------------------------------------------------------------------------
+// =================================================================================================
+// IMPORTS
+// =================================================================================================
 
 const { Client, Collection, GatewayIntentBits, Events, MessageFlags } = require("discord.js");
 const { LoadCommand, ModularCommandHandler } = require("js-discord-modularcommand");
@@ -20,9 +20,9 @@ const { config } = require("dotenv");
 
 config();
 
-// -----------------------------------------------------------------------------
-// DISCORD CLIENT INITIALIZATION
-// -----------------------------------------------------------------------------
+// ================================================================================================
+// CLIENT INITIALIZATION
+// ================================================================================================
 
 const client = new Client({
     intents: [
@@ -33,9 +33,9 @@ const client = new Client({
 
 client.commands = new Collection();
 
-// -----------------------------------------------------------------------------
+// ================================================================================================
 // COMMAND LOADING
-// -----------------------------------------------------------------------------
+// ================================================================================================
 
 const commandPath = join(__dirname, 'commands');
 const commandFiles = readdirSync(commandPath).filter(file => file.endsWith('.js'));
@@ -52,9 +52,9 @@ for (const cmd of commands) {
     client.commands.set(cmd.data.name, cmd);
 }
 
-// -----------------------------------------------------------------------------
+// ==============================================================================
 // EVENT HANDLERS
-// -----------------------------------------------------------------------------
+// ==============================================================================
 
 // A global flag for our middleware example. Set to 'true' to activate maintenance mode.
 const BOT_IN_MAINTENANCE = false;
@@ -86,8 +86,8 @@ client.once(Events.ClientReady, () => {
     console.log(`Logged in as ${client.user.tag}`);
 });
 
-// -----------------------------------------------------------------------------
+// ==============================================================================
 // CLIENT LOGIN
-// -----------------------------------------------------------------------------
+// ==============================================================================
 
 client.login(process.env.DISCORD_TOKEN);

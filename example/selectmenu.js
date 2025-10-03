@@ -1,41 +1,38 @@
 /**
- * @file        selectmenu.js
- * @author      vicentefelipechile
- * @version     1.1.0
  * @license     MIT
+ * @version     2.5.2
+ * @file        example/selectmenu.js
+ * @author      vicentefelipechile
  * @description Example of a modular command that sends an interactive select menu.
  * This script demonstrates how to create a command that replies with a select menu,
  * handle the selection, and use localization for all its text components.
  */
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // IMPORTS SECTION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
-// Import necessary classes and builders.
 const { ActionRowBuilder } = require("@discordjs/builders");
 const { Locale, MessageFlags } = require("discord.js");
-// Assuming ModularCommand and RegisterCommand are in a local library path
-// For a published package, it would be: require("js-discord-modularcommand");
-const { ModularCommand, RegisterCommand } = require("../index.js"); // Adjust this path if necessary
+const { ModularCommand, RegisterCommand } = require("js-discord-modularcommand");
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // COMMAND INITIALIZATION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Create a new instance of ModularCommand for the 'selectmenu' command.
 const selectMenuCommand = new ModularCommand('selectmenu');
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // MAIN COMMAND CONFIGURATION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Set the default description for the command.
 selectMenuCommand.setDescription('Sends a select menu!');
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // LOCALIZATION CONFIGURATION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Set localized descriptions for the command itself.
 selectMenuCommand.setLocalizationDescription({
@@ -73,9 +70,9 @@ selectMenuCommand.setLocalizationPhrases({
     }
 });
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // SELECT MENU DEFINITION & HANDLER
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Create a new select menu instance with the ID 'starter'.
 const starterSelect = selectMenuCommand.addSelectMenu('starter'); // 'starter' is the custom ID
@@ -98,12 +95,10 @@ starterSelect.setExecute(async ({ interaction, selected, locale }) => {
     });
 });
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // EXECUTION LOGIC
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
-// This function runs when the initial '/selectmenu' command is executed.
-// Its purpose is to build and send the message containing the select menu.
 selectMenuCommand.setExecute(async ({ interaction, locale }) => {
     // An ActionRow is a container for components like select menus.
     const row = new ActionRowBuilder();
@@ -122,10 +117,9 @@ selectMenuCommand.setExecute(async ({ interaction, locale }) => {
     });
 });
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // COMMAND EXPORT
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
-// Wrap and export the command to be loaded by the handler.
 module.exports = RegisterCommand(selectMenuCommand);
 

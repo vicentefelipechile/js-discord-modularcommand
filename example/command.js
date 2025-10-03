@@ -1,17 +1,17 @@
 /**
- * @file        command.js
- * @author      vicentefelipechile
- * @version     2.4.0
  * @license     MIT
+ * @version     2.5.2
+ * @file        example/command.js
+ * @author      vicentefelipechile
  * @description Example of a 'pong' modular command.
  * This script demonstrates how to create a simple command, set its description,
  * add localizations for different languages, and define its execution logic
  * using the js-discord-modularcommand library.
  */
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // IMPORTS SECTION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Import the necessary classes from the corresponding libraries.
 // - ModularCommand: The base class to create our command.
@@ -20,26 +20,26 @@
 const { ModularCommand, RegisterCommand } = require("js-discord-modularcommand");
 const { Locale } = require("discord.js");
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // COMMAND INITIALIZATION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Create a new instance of ModularCommand.
 // The string 'pong' is the name the command will have on Discord.
 const pong = new ModularCommand('pong');
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // MAIN COMMAND CONFIGURATION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // setDescription sets the default description for the command.
 // This will be used if the user's Discord client language does not match
 // any of the localizations defined below.
 pong.setDescription('Replies with Pong!');
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // LOCALIZATION CONFIGURATION (INTERNATIONALIZATION)
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // setLocalizationPhrases is used to define a set of phrases
 // in different languages, useful for more complex responses or menus.
@@ -61,9 +61,9 @@ pong.setLocalizationDescription({
     [Locale.SpanishLATAM]: 'Responde con Pong!', // Description in Latin American Spanish.
 });
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // EXECUTION LOGIC
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // setExecute defines the function that will run when a user uses the command.
 // It receives an object with the 'interaction' property, which contains all
@@ -75,9 +75,9 @@ pong.setExecute(async ({ interaction }) => {
     await interaction.reply('Pong!');
 });
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // COMMAND EXPORT
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Finally, we wrap our command instance with the RegisterCommand function.
 // This prepares and standardizes it to be read and loaded by the main command handler.

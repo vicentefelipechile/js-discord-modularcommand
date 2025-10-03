@@ -1,39 +1,39 @@
 /**
- * @file        button.js
- * @author      vicentefelipechile
- * @version     2.4.0
  * @license     MIT
+ * @version     2.5.2
+ * @file        example/button.js
+ * @author      vicentefelipechile
  * @description Example of a modular command that sends interactive buttons.
  * This script demonstrates how to create a command that replies with buttons,
  * handle button clicks, and use localization for button labels and responses.
  */
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // IMPORTS SECTION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Import necessary classes and builders.
 const { ActionRowBuilder } = require("@discordjs/builders");
 const { ButtonStyle, Locale } = require("discord.js");
 const { ModularCommand, RegisterCommand } = require("js-discord-modularcommand");
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // COMMAND INITIALIZATION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Create a new instance of ModularCommand for the 'buttoncommand' command.
 const buttonCommand = new ModularCommand('buttoncommand');
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // MAIN COMMAND CONFIGURATION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Set the default description for the command.
 buttonCommand.setDescription('Sends a button!');
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // LOCALIZATION CONFIGURATION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Set localized descriptions for the command itself.
 buttonCommand.setLocalizationDescription({
@@ -61,9 +61,9 @@ buttonCommand.setLocalizationPhrases({
     }
 });
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // BUTTON HANDLERS
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Register a handler for the first button with the custom ID 'clickme'.
 // The callback function will be executed when a user clicks this button.
@@ -86,9 +86,9 @@ const button2 = buttonCommand.addButton('anotherbutton', async ({ interaction, l
 button1.getButton().setStyle(ButtonStyle.Primary);
 button2.getButton().setStyle(ButtonStyle.Success);
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // EXECUTION LOGIC
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // This function runs when the initial '/button' command is executed.
 buttonCommand.setExecute(async ({ interaction, locale }) => {
@@ -108,9 +108,9 @@ buttonCommand.setExecute(async ({ interaction, locale }) => {
     });
 });
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // COMMAND EXPORT
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Wrap and export the command to be loaded by the handler.
 module.exports = RegisterCommand(buttonCommand);

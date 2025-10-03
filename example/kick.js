@@ -1,38 +1,38 @@
 /**
- * @file        kick.js
- * @author      vicentefelipechile
- * @version     2.4.0
  * @license     MIT
+ * @version     2.5.2
+ * @file        example/kick.js
+ * @author      vicentefelipechile
  * @description Example of a modular 'kick' command.
  * This script demonstrates a more advanced command that includes permission checks,
  * command options, and the use of localization for descriptions, options, and in-command phrases.
  */
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // IMPORTS SECTION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Import necessary classes and enums from discord.js and the modular command library.
 const { PermissionFlagsBits, Locale, ApplicationCommandOptionType, MessageFlags } = require('discord.js');
 const { ModularCommand, RegisterCommand } = require('js-discord-modularcommand');
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // COMMAND INITIALIZATION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Create a new instance of ModularCommand for the 'kick' command.
 const kickCommand = new ModularCommand('kick');
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // MAIN COMMAND CONFIGURATION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Set the default description for the command. This is used if no localization matches.
 kickCommand.setDescription('Kick a user from the server');
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // LOCALIZATION CONFIGURATION
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Set localized descriptions for the command itself.
 kickCommand.setLocalizationDescription({
@@ -66,9 +66,9 @@ kickCommand.setLocalizationPhrases({
     }
 });
         
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // PERMISSION HANDLING
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // setPermissionCheck defines a function that runs before the command executes.
 // It should return 'true' if the user has permission, and 'false' otherwise.
@@ -77,9 +77,9 @@ kickCommand.setPermissionCheck(({ interaction }) => {
     return interaction.member.permissions.has(PermissionFlagsBits.KickMembers);
 });
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // COMMAND OPTIONS
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // addOption defines the parameters the command will accept.
 kickCommand.addOption({
@@ -88,9 +88,9 @@ kickCommand.addOption({
     required: true, // This option must be provided by the user.
 });
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // EXECUTION LOGIC
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // setExecute defines the main logic of the command.
 // It receives the interaction, parsed arguments (args), and the selected locale phrases (locale).
@@ -135,9 +135,9 @@ kickCommand.setExecute(async ({ interaction, args, locale }) => {
     }
 });
 
-// -----------------------------------------------------------------------------
+// =================================================================================================
 // COMMAND EXPORT
-// -----------------------------------------------------------------------------
+// =================================================================================================
 
 // Wrap the command with RegisterCommand to prepare it for the command handler.
 module.exports = RegisterCommand(kickCommand);
