@@ -41,6 +41,14 @@ export default class ModularModal {
      * @param {ModularCommand} command The command that this modal is associated with.
      */
     constructor(modalId: string, command: ModularCommand) {
+        if (!modalId || typeof modalId !== "string") {
+            throw new Error("Modal ID must be a non-empty string.");
+        }
+
+        if (!command.name || typeof command.name !== "string") {
+            throw new Error("ModularCommand must have a valid name.");
+        }
+
         this.customId = `${command.name}_${modalId}`;
         this.modalId = modalId;
         this.command = command;
@@ -70,6 +78,10 @@ export default class ModularModal {
      * @returns {this} The current ModularModal instance for method chaining.
      */
     setExecute(executeFunction: ModalExecuteFunction): this {
+        if (!executeFunction || typeof executeFunction !== "function") {
+            throw new Error("Execute function must be a valid function.");
+        }
+
         this.execute = executeFunction;
         return this;
     }
@@ -80,6 +92,10 @@ export default class ModularModal {
      * @returns {TextInputBuilder} The created text input instance.
      */
     newTextInput(id: string): TextInputBuilder {
+        if (!id || typeof id !== "string") {
+            throw new Error("Text input ID must be a non-empty string.");
+        }
+
         const textInput = new TextInputBuilder()
             .setCustomId(id);
 
@@ -97,18 +113,31 @@ export default class ModularModal {
      * @returns {ModalBuilder} The fully constructed modal object ready to be sent to a user.
      */
     build(locale: LocaleKey): ModalBuilder {
-        this.modalObject.setTitle(locale[`${this.command.name}.${this.modalId}.title`]);
+        if (!locale || typeof locale !== "object") {
+            throw new Error("Locale must be a valid object.");
+        }
+
+        const titleKey = `${this.command.name}.${this.modalId}.title`;
+        if (!locale[titleKey]) {
+            throw new Error(`Missing locale entry for modal title: ${titleKey}`);
+        }
+
+        this.modalObject.setTitle(locale[titleKey]);
 
         this.modalInputs.forEach((input, id) => {
             const labelKey = `${this.command.name}.${id}.label`;
             const placeholderKey = `${this.command.name}.${id}.placeholder`;
 
-            if (locale[labelKey]) {
-                input.setLabel(locale[labelKey]);
+            if (!locale[labelKey]) {
+                throw new Error(`Missing locale entry for text input label: ${labelKey}`);
             }
-            if (locale[placeholderKey]) {
-                input.setPlaceholder(locale[placeholderKey]);
+
+            if (!locale[placeholderKey]) {
+                throw new Error(`Missing locale entry for text input placeholder: ${placeholderKey}`);
             }
+
+            input.setLabel(locale[labelKey]);
+            input.setPlaceholder(locale[placeholderKey]);
         });
 
         return this.modalObject;

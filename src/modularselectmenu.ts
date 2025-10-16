@@ -41,6 +41,14 @@ export default class ModularSelectMenu {
      * @param {ModularCommand} command The command that this select menu is associated with.
      */
     constructor(selectMenuId: string, command: ModularCommand) {
+        if (!selectMenuId || typeof selectMenuId !== "string") {
+            throw new Error("Select Menu ID must be a non-empty string.");
+        }
+
+        if (!command.name || typeof command.name !== "string") {
+            throw new Error("ModularCommand must have a valid name.");
+        }
+
         this.selectMenuId = selectMenuId;
         this.command = command;
         this.customId = `${command.name}_${selectMenuId}`;
@@ -70,6 +78,10 @@ export default class ModularSelectMenu {
      * @returns {this} The current ModularSelectMenu instance for method chaining.
      */
     setExecute(executeFunction: SelectMenuExecuteFunction): this {
+        if (!executeFunction || typeof executeFunction !== "function") {
+            throw new Error("Execute function must be a valid function.");
+        }
+
         this.execute = executeFunction;
         return this;
     }
@@ -81,6 +93,10 @@ export default class ModularSelectMenu {
      * @returns {StringSelectMenuOptionBuilder} The created option instance for further configuration (e.g., `setDefault`).
      */
     addOption(value: string): StringSelectMenuOptionBuilder {
+        if (!value || typeof value !== "string") {
+            throw new Error("Option value must be a non-empty string.");
+        }
+
         const option = new StringSelectMenuOptionBuilder().setValue(value);
         this.options.set(value, option);
         return option;
@@ -92,6 +108,10 @@ export default class ModularSelectMenu {
      * @returns {StringSelectMenuBuilder} The fully constructed select menu object ready to be sent to a user.
      */
     build(locale: LocaleKey): StringSelectMenuBuilder {
+        if (!locale || typeof locale !== "object") {
+            throw new Error("Locale must be a valid object.");
+        }
+
         const placeholderKey = `${this.command.name}.${this.selectMenuId}.placeholder`;
         if (locale[placeholderKey]) {
             this.selectMenuObject.setPlaceholder(locale[placeholderKey]);

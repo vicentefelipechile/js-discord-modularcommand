@@ -124,6 +124,10 @@ function processSubCommands(commandBuilder: SlashCommandBuilder, command: Modula
         commandBuilder.addSubcommand((subcommand: SlashCommandSubcommandBuilder) => {
             // Get localized description for subcommand
             const subCmdDescription = getLocalizedSubCommandDescription(command, subCmd.name, subCmd.description);
+
+            if (typeof subCmdDescription !== 'string' || subCmdDescription.trim() === '') {
+                throw new Error(`Subcommand '${subCmd.name}' is missing a description.`);
+            }
             
             subcommand
                 .setName(subCmd.name)

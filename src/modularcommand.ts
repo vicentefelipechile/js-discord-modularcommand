@@ -131,6 +131,10 @@ export default class ModularCommand {
      * @returns {ModularCommand} The command instance for chaining.
      */
     setDescription(description: string): this {
+        if (!description || typeof description !== "string") {
+            throw new Error("Description must be a non-empty string.");
+        }
+
         this.description = description;
         return this;
     }
@@ -142,6 +146,10 @@ export default class ModularCommand {
      * @returns {ModularCommand} The command instance for chaining.
      */
     setLocalizationsDescription(localizations: LocalizationMap): this {
+        if (!localizations || typeof localizations !== "object") {
+            throw new Error("Localizations must be a valid object.");
+        }
+
         return this.setLocalizationDescription(localizations);
     }
 
@@ -151,6 +159,10 @@ export default class ModularCommand {
      * @returns {ModularCommand} The command instance for chaining.
      */
     setLocalizationDescription(localizations: LocalizationMap): this {
+        if (!localizations || typeof localizations !== "object") {
+            throw new Error("Localizations must be a valid object.");
+        }
+
         this.description = localizations[Locale.EnglishUS] || this.description;
         this.descriptionLocalizations = {
             ...this.descriptionLocalizations,
@@ -165,6 +177,10 @@ export default class ModularCommand {
      * @returns {ModularCommand} The command instance for chaining.
      */
     setLocalizationOptions(localizations: LocalizationMap): this {
+        if (!localizations || typeof localizations !== "object") {
+            throw new Error("Localizations must be a valid object.");
+        }
+
         this.optionsLocalizations = {
             ...this.optionsLocalizations,
             ...localizations,
@@ -178,6 +194,10 @@ export default class ModularCommand {
      * @returns {ModularCommand} The command instance for chaining.
      */
     setLocalizationPhrases(localizationPhrases: LocalizationMap): this {
+        if (!localizationPhrases || typeof localizationPhrases !== "object") {
+            throw new Error("Localization phrases must be a valid object.");
+        }
+
         this.localizationPhrases = {
             ...this.localizationPhrases,
             ...localizationPhrases,
@@ -191,6 +211,10 @@ export default class ModularCommand {
      * @returns {ModularCommand} The command instance for chaining.
      */
     setLocalizationSubCommands(localizations: LocalizationMap): this {
+        if (!localizations || typeof localizations !== "object") {
+            throw new Error("Localizations must be a valid object.");
+        }
+
         this.subCommandLocalizations = {
             ...this.subCommandLocalizations,
             ...localizations,
@@ -204,6 +228,10 @@ export default class ModularCommand {
      * @returns {ModularCommand} The command instance for chaining.
      */
     setExecute(executeFunction: CommandExecuteFunction): this {
+        if (!executeFunction || typeof executeFunction !== "function") {
+            throw new Error("Execute function must be a valid function.");
+        }
+
         this.execute = executeFunction;
         return this;
     }
@@ -215,6 +243,14 @@ export default class ModularCommand {
      * @returns {ModularCommand} The command instance for chaining.
      */
     setComponentExecute(componentId: string, executeFunction: ComponentExecuteFunction): this {
+        if (!componentId || typeof componentId !== "string") {
+            throw new Error("Component ID must be a non-empty string.");
+        }
+
+        if (!executeFunction || typeof executeFunction !== "function") {
+            throw new Error("Execute function must be a valid function.");
+        }
+
         this.componentId = componentId;
         this.componentExecute = executeFunction;
         return this;
@@ -226,6 +262,10 @@ export default class ModularCommand {
      * @returns {ModularCommand} The command instance for chaining.
      */
     setPermissionCheck(permissionCheckFunction: PermissionCheckFunction): this {
+        if (!permissionCheckFunction || typeof permissionCheckFunction !== "function") {
+            throw new Error("Permission check function must be a valid function.");
+        }
+
         this.permissionCheck = permissionCheckFunction;
         return this;
     }
@@ -236,6 +276,10 @@ export default class ModularCommand {
      * @returns {ModularCommand} The command instance for chaining.
      */
     setCooldown(cooldown: number): this {
+        if (typeof cooldown !== "number" || cooldown < 0) {
+            throw new Error("Cooldown must be a non-negative number.");
+        }
+
         this.cooldown = cooldown;
         return this;
     }
@@ -254,6 +298,10 @@ export default class ModularCommand {
      * @returns {ModularCommand} The command instance for chaining.
      */
     addOption(option: CommandOption): this {
+        if (!option || typeof option !== "object") {
+            throw new Error("Option must be a valid object.");
+        }
+
         this.options.push(option);
         return this;
     }
@@ -264,6 +312,10 @@ export default class ModularCommand {
      * @returns {ModularCommand} The command instance for chaining.
      */
     addSubCommand(subCommand: SubCommand): this {
+        if (!subCommand || typeof subCommand !== "object") {
+            throw new Error("SubCommand must be a valid object.");
+        }
+
         this.subCommands.push(subCommand);
         return this;
     }
@@ -275,6 +327,14 @@ export default class ModularCommand {
      * @returns {ModularCommand} The command instance for chaining.
      */
     addCustomIDHandler(customId: string, handlerFunction: CommandExecuteFunction | ButtonExecuteFunction | ModalExecuteFunction | SelectMenuExecuteFunction): this {
+        if (!customId || typeof customId !== "string") {
+            throw new Error("Custom ID must be a non-empty string.");
+        }
+
+        if (!handlerFunction || typeof handlerFunction !== "function") {
+            throw new Error("Handler function must be a valid function.");
+        }
+
         this.customIdHandlers[customId] = handlerFunction;
         return this;
     }
@@ -285,6 +345,10 @@ export default class ModularCommand {
      * @returns {ModularModal} The created modal instance.
      */
     addModal(modalId: string): ModularModal {
+        if (!modalId || typeof modalId !== "string") {
+            throw new Error("Modal ID must be a non-empty string.");
+        }
+
         const modal = new ModularModal(modalId, this);
         this.modals.set(modalId, modal);
         return modal;
@@ -297,6 +361,14 @@ export default class ModularCommand {
      * @return {ModularButton} The created button instance.
      */
     addButton(customId: string, execute: ButtonExecuteFunction): ModularButton {
+        if (!customId || typeof customId !== "string") {
+            throw new Error("Custom ID must be a non-empty string.");
+        }
+
+        if (!execute || typeof execute !== "function") {
+            throw new Error("Execute function must be a valid function.");
+        }
+
         const button = new ModularButton(customId, this);
         button.setExecute(execute);
         this.buttons.set(customId, button);
@@ -311,6 +383,10 @@ export default class ModularCommand {
      * @returns {ModularSelectMenu} The created select menu instance.
      */
     addSelectMenu(selectMenuId: string): ModularSelectMenu {
+        if (!selectMenuId || typeof selectMenuId !== "string") {
+            throw new Error("Select Menu ID must be a non-empty string.");
+        }
+
         const menu = new ModularSelectMenu(selectMenuId, this);
         this.selectMenus.set(selectMenuId, menu);
         this.selectMenusArray.push(menu);

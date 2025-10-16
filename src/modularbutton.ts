@@ -38,6 +38,14 @@ export default class ModularButton {
      * @param {string} customId The custom ID for the button. This should be unique within the context of a message.
      */
     constructor(customId: string, command: ModularCommand) {
+        if (!customId || typeof customId !== "string") {
+            throw new Error("Custom ID must be a non-empty string.");
+        }
+
+        if (!command.name || typeof command.name !== "string") {
+            throw new Error("ModularCommand must have a valid name.");
+        }
+
         this.buttonObject = new ButtonBuilder()
             .setCustomId(`${command.name}_${customId}`)
 
@@ -78,7 +86,16 @@ export default class ModularButton {
      * @returns {ButtonBuilder} The built ButtonBuilder instance with localized label.
      */
     build(locale: LocaleKey): ButtonBuilder {
-        this.buttonObject.setLabel(locale[`${this.command.name}.${this.buttonId}`]);
+        if (!locale || typeof locale !== "object") {
+            throw new Error("Locale must be a valid object.");
+        }
+
+        const labelKey = `${this.command.name}.${this.buttonId}`;
+        if (!locale[labelKey]) {
+            throw new Error(`Locale key "${labelKey}" not found in the provided locale object.`);
+        }
+
+        this.buttonObject.setLabel(locale[labelKey]);
 
         return this.buttonObject;
     }
