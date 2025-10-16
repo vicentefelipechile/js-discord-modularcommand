@@ -260,4 +260,4 @@ export type SelectMenuExecuteFunction = (params: SelectMenuExecuteParams) => Pro
  * @description Defines the signature for a function that checks a user's permissions to execute a command.
  * @returns {boolean | Promise<boolean>} `true` if the user has permission, `false` otherwise.
  */
-export type PermissionCheckFunction = (params: { interaction: CommandInteraction }) => boolean | Promise<boolean>;
+export type PermissionCheckFunction = (interaction: CommandInteraction) => boolean | Promise<boolean>;

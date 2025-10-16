@@ -269,7 +269,7 @@ function getCommandLocale(command: ModularCommand, interaction: Interaction | Me
 function createChatInputExecutor(command: ModularCommand, options: Record<string, OptionType>) {
     return async (interaction: ChatInputCommandInteraction): Promise<void> => {
         // Permission & NSFW Checks
-        if (command.permissionCheck && !command.permissionCheck({ interaction })) {
+        if (command.permissionCheck && !command.permissionCheck(interaction)) {
             await interaction.reply({ content: LOCALE_FORBIDDEN[interaction.locale], flags: MessageFlags.Ephemeral });
             return;
         }
