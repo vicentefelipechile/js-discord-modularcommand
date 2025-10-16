@@ -39,39 +39,79 @@ type LocalizationPhrases = Record<string, string>;
 
 /**
  * @description Gets localized description for a subcommand.
+ * Supports multiple languages and falls back to default description if not found.
  * @param {ModularCommand} command The command instance.
  * @param {string} subCommandName The name of the subcommand.
  * @param {string} defaultDescription The default description.
+ * @param {string} locale The locale to use (defaults to EnglishUS).
  * @returns {string} The localized description.
  */
-function getLocalizedSubCommandDescription(command: ModularCommand, subCommandName: string, defaultDescription: string): string {
+function getLocalizedSubCommandDescription(
+    command: ModularCommand, 
+    subCommandName: string, 
+    defaultDescription: string,
+    locale: string = Locale.EnglishUS
+): string {
     if (!command.subCommandLocalizations) return defaultDescription;
     
     const localizations = command.subCommandLocalizations as Record<string, Record<string, string>>;
-    const enLocalizations = localizations[Locale.EnglishUS];
+    const key = `${subCommandName}.description`;
     
-    return enLocalizations?.[`${subCommandName}.description`] || defaultDescription;
+    // Try to get the localization for the requested locale
+    const targetLocalizations = localizations[locale];
+    if (targetLocalizations?.[key]) {
+        return targetLocalizations[key];
+    }
+    
+    // Fall back to English if the requested locale is not found
+    const enLocalizations = localizations[Locale.EnglishUS];
+    if (enLocalizations?.[key]) {
+        return enLocalizations[key];
+    } else {
+        throw new Error(`Missing localization for subcommand '${subCommandName}' in command '${command.name}'`);
+    }
 }
 
 /**
  * @description Gets localized description for a subcommand option.
+ * Supports multiple languages and falls back to default description if not found.
  * @param {ModularCommand} command The command instance.
  * @param {string} subCommandName The name of the subcommand.
  * @param {string} optionName The name of the option.
  * @param {string} defaultDescription The default description.
+ * @param {string} locale The locale to use (defaults to EnglishUS).
  * @returns {string} The localized description.
  */
-function getLocalizedOptionDescription(command: ModularCommand, subCommandName: string, optionName: string, defaultDescription: string): string {
+function getLocalizedOptionDescription(
+    command: ModularCommand, 
+    subCommandName: string, 
+    optionName: string, 
+    defaultDescription: string,
+    locale: string = Locale.EnglishUS
+): string {
     if (!command.subCommandLocalizations) return defaultDescription;
     
     const localizations = command.subCommandLocalizations as Record<string, Record<string, string>>;
-    const enLocalizations = localizations[Locale.EnglishUS];
+    const key = `${subCommandName}.${optionName}.description`;
     
-    return enLocalizations?.[`${subCommandName}.${optionName}.description`] || defaultDescription;
+    // Try to get the localization for the requested locale
+    const targetLocalizations = localizations[locale];
+    if (targetLocalizations?.[key]) {
+        return targetLocalizations[key];
+    }
+    
+    // Fall back to English if the requested locale is not found
+    const enLocalizations = localizations[Locale.EnglishUS];
+    if (enLocalizations?.[key]) {
+        return enLocalizations[key];
+    } else {
+        throw new Error(`Missing localization for option '${optionName}' in subcommand '${subCommandName}' for command '${command.name}'`);
+    }
 }
 
 /**
  * @description Creates an option builder function with common configuration.
+ * Supports multi-language descriptions through LocalizationMap.
  * @param {CommandOption} opt The option configuration.
  * @param {string} description The resolved description.
  * @returns {Function} The option builder function.
@@ -122,6 +162,10 @@ function processSubCommands(commandBuilder: SlashCommandBuilder, command: Modula
 
     command.subCommands.forEach(subCmd => {
         commandBuilder.addSubcommand((subcommand: SlashCommandSubcommandBuilder) => {
+            if (typeof subCmd.name !== 'string' || subCmd.name.trim() === '') {
+                throw new Error("A subcommand is missing a name.");
+            }
+
             // Get localized description for subcommand
             const subCmdDescription = getLocalizedSubCommandDescription(command, subCmd.name, subCmd.description);
 
@@ -386,8 +430,13 @@ export default function RegisterCommand(commands: ModularCommand[] | ModularComm
     commands = Array.isArray(commands) ? commands : [commands];
     
     return commands.map(command => {
-        if (command.name === undefined) throw new Error("A command is missing a name.");
-        if (command.description === undefined) throw new Error(`Command "${command.name}" is missing a description.`);
+        if (typeof command.name !== 'string' || command.name.trim() === '') {
+            throw new Error("A command is missing a name.");
+        }
+
+        if (typeof command.description !== 'string' || command.description.trim() === '') {
+            throw new Error(`Command "${command.name}" is missing a description.`);
+        }
 
         // Build SlashCommand Data
         const commandBuilder = new SlashCommandBuilder()
