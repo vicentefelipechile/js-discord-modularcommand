@@ -388,9 +388,13 @@ function createButtonExecutor(command: ModularCommand) {
         const buttonObject = command.buttons.get(interaction.customId.split('_')[1]);
         if (!buttonObject) return;
 
-        if (!buttonObject.allowOthers && interaction.user.id !== interaction.message.author.id) {
-            await interaction.reply({ content: LOCALE_FORBIDDEN[interaction.locale], flags: MessageFlags.Ephemeral });
-            return;
+        // Check if the button is allowed to be used by others
+        if (buttonObject.allowOthers === false) {
+            const interactionData = interaction.message.interactionMetadata;
+            if (interactionData !== null && interactionData.user.id !== interaction.user.id) {
+                await interaction.reply({ content: LOCALE_FORBIDDEN[interaction.locale], flags: MessageFlags.Ephemeral });
+                return;
+            }
         }
 
         await buttonObject.execute({
