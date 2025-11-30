@@ -33,7 +33,9 @@ export default class ModularSelectMenu {
     /** The command instance to which this select menu belongs. */
     public command: ModularCommand;
     /** The function to execute when the select menu is interacted with. */
-    public execute: SelectMenuExecuteFunction = async () => {};
+    public execute: SelectMenuExecuteFunction = async () => { };
+    /** Whether the select menu should be interacted by all users. */
+    public allowOthers: boolean = false;
 
     /**
      * @description Creates a new ModularSelectMenu instance.
@@ -124,7 +126,7 @@ export default class ModularSelectMenu {
 
             // Set label from locale, fallback to the value if not found
             optionBuilder.setLabel(locale[labelKey] || value);
-            
+
             if (locale[descriptionKey]) {
                 optionBuilder.setDescription(locale[descriptionKey]);
             }
@@ -136,5 +138,23 @@ export default class ModularSelectMenu {
         }
 
         return this.selectMenuObject;
+    }
+
+    /**
+     * @description Sets whether the select menu should be interacted by all users.
+     * @returns {this} The current ModularSelectMenu instance for method chaining.
+     */
+    setAllowOthers(): this {
+        this.allowOthers = true;
+        return this;
+    }
+
+    /**
+     * @description Retrieves the allowOthers property of the select menu.
+     * @returns {boolean} The allowOthers property of the select menu.
+     */
+    setOnlyAuthor(): this {
+        this.allowOthers = false;
+        return this;
     }
 }

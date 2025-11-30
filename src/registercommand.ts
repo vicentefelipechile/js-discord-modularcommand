@@ -47,22 +47,22 @@ type LocalizationPhrases = Record<string, string>;
  * @returns {string} The localized description.
  */
 function getLocalizedSubCommandDescription(
-    command: ModularCommand, 
-    subCommandName: string, 
+    command: ModularCommand,
+    subCommandName: string,
     defaultDescription: string,
     locale: string = Locale.EnglishUS
 ): string {
     if (!command.subCommandLocalizations) return defaultDescription;
-    
+
     const localizations = command.subCommandLocalizations as Record<string, Record<string, string>>;
     const key = `${subCommandName}.description`;
-    
+
     // Try to get the localization for the requested locale
     const targetLocalizations = localizations[locale];
     if (targetLocalizations?.[key]) {
         return targetLocalizations[key];
     }
-    
+
     // Fall back to English if the requested locale is not found
     const enLocalizations = localizations[Locale.EnglishUS];
     if (enLocalizations?.[key]) {
@@ -83,23 +83,23 @@ function getLocalizedSubCommandDescription(
  * @returns {string} The localized description.
  */
 function getLocalizedOptionDescription(
-    command: ModularCommand, 
-    subCommandName: string, 
-    optionName: string, 
+    command: ModularCommand,
+    subCommandName: string,
+    optionName: string,
     defaultDescription: string,
     locale: string = Locale.EnglishUS
 ): string {
     if (!command.subCommandLocalizations) return defaultDescription;
-    
+
     const localizations = command.subCommandLocalizations as Record<string, Record<string, string>>;
     const key = `${subCommandName}.${optionName}.description`;
-    
+
     // Try to get the localization for the requested locale
     const targetLocalizations = localizations[locale];
     if (targetLocalizations?.[key]) {
         return targetLocalizations[key];
     }
-    
+
     // Fall back to English if the requested locale is not found
     const enLocalizations = localizations[Locale.EnglishUS];
     if (enLocalizations?.[key]) {
@@ -172,7 +172,7 @@ function processSubCommands(commandBuilder: SlashCommandBuilder, command: Modula
             if (typeof subCmdDescription !== 'string' || subCmdDescription.trim() === '') {
                 throw new Error(`Subcommand '${subCmd.name}' is missing a description.`);
             }
-            
+
             subcommand
                 .setName(subCmd.name)
                 .setDescription(subCmdDescription);
@@ -184,16 +184,16 @@ function processSubCommands(commandBuilder: SlashCommandBuilder, command: Modula
                     let description = typeof opt.description === 'string'
                         ? opt.description
                         : (opt.description[Locale.EnglishUS] || `The description for ${opt.name} in English.`);
-                    
+
                     // Apply subcommand-specific localization
                     description = getLocalizedOptionDescription(command, subCmd.name, opt.name, description);
-                    
+
                     if (!description) {
                         throw new Error(`Option '${opt.name}' in subcommand '${subCmd.name}' is missing a description.`);
                     }
 
                     options[opt.name] = opt.type;
-                    
+
                     const optionBuilder = createOptionBuilder(opt, description);
                     addOptionToBuilder(subcommand, opt, optionBuilder);
                 });
@@ -215,13 +215,13 @@ function processRegularOptions(commandBuilder: SlashCommandBuilder, command: Mod
         const description = typeof opt.description === 'string'
             ? opt.description
             : (opt.description[Locale.EnglishUS] || `The description for ${opt.name} in English.`);
-        
+
         if (!description) {
             throw new Error(`Option '${opt.name}' is missing a description.`);
         }
 
         options[opt.name] = opt.type;
-        
+
         const optionBuilder = createOptionBuilder(opt, description);
         addOptionToBuilder(commandBuilder, opt, optionBuilder);
     });
@@ -269,7 +269,12 @@ function getCommandLocale(command: ModularCommand, interaction: Interaction | Me
 function createChatInputExecutor(command: ModularCommand, options: Record<string, OptionType>) {
     return async (interaction: ChatInputCommandInteraction): Promise<void> => {
         // Permission & NSFW Checks
-        if (command.permissionCheck && !command.permissionCheck(interaction)) {
+        let hasPermission = true;
+        if (command.permissionCheck !== undefined) {
+            hasPermission = await command.permissionCheck(interaction);
+        }
+
+        if (!hasPermission) {
             await interaction.reply({ content: LOCALE_FORBIDDEN[interaction.locale], flags: MessageFlags.Ephemeral });
             return;
         }
@@ -289,7 +294,7 @@ function createChatInputExecutor(command: ModularCommand, options: Record<string
 
         // Argument Parsing
         const args: Record<string, CommandArgumentValue> = {};
-        
+
         // Check if this command has subcommands and get the current subcommand
         let currentSubcommand = null;
         if (command.subCommands && command.subCommands.length > 0) {
@@ -299,7 +304,7 @@ function createChatInputExecutor(command: ModularCommand, options: Record<string
                 throw new Error(`Subcommand not found for command ${command.name}.`);
             }
         }
-        
+
         for (const optionName of Object.keys(options)) {
             switch (options[optionName]) {
                 case OptionType.String: args[optionName] = interaction.options.getString(optionName, false); break;
@@ -312,7 +317,7 @@ function createChatInputExecutor(command: ModularCommand, options: Record<string
                 default: throw new Error(`Unsupported option type: ${options[optionName]}`);
             }
         }
-        
+
         // Add the current subcommand to args if it exists
         if (currentSubcommand) {
             args['subcommand'] = currentSubcommand;
@@ -383,6 +388,11 @@ function createButtonExecutor(command: ModularCommand) {
         const buttonObject = command.buttons.get(interaction.customId.split('_')[1]);
         if (!buttonObject) return;
 
+        if (!buttonObject.allowOthers && interaction.user.id !== interaction.message.author.id) {
+            await interaction.reply({ content: LOCALE_FORBIDDEN[interaction.locale], flags: MessageFlags.Ephemeral });
+            return;
+        }
+
         await buttonObject.execute({
             interaction,
             command,
@@ -403,6 +413,11 @@ function createSelectMenuExecutor(command: ModularCommand) {
     return async (interaction: StringSelectMenuInteraction): Promise<void> => {
         const menuObject = command.selectMenus.get(interaction.customId.split('_')[1]);
         if (!menuObject) return;
+
+        if (!menuObject.allowOthers && interaction.user.id !== interaction.message.author.id) {
+            await interaction.reply({ content: LOCALE_FORBIDDEN[interaction.locale], flags: MessageFlags.Ephemeral });
+            return;
+        }
 
         // The user's selected option value is abstracted into `selected`.
         await menuObject.execute({
@@ -428,7 +443,7 @@ function createSelectMenuExecutor(command: ModularCommand) {
  */
 export default function RegisterCommand(commands: ModularCommand[] | ModularCommand): CommandData[] {
     commands = Array.isArray(commands) ? commands : [commands];
-    
+
     return commands.map(command => {
         if (typeof command.name !== 'string' || command.name.trim() === '') {
             throw new Error("A command is missing a name.");

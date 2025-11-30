@@ -32,6 +32,8 @@ export default class ModularButton {
     public command: ModularCommand;
     /** Use other mechanisms to handle button interactions. */
     public execute: ButtonExecuteFunction = async () => { };
+    /** Whether the button should be interacted by all users. */
+    public allowOthers: boolean = false;
 
     /**
      * @description Creates a new ModularButton instance.
@@ -46,11 +48,10 @@ export default class ModularButton {
             throw new Error("ModularCommand must have a valid name.");
         }
 
-        this.buttonObject = new ButtonBuilder()
-            .setCustomId(`${command.name}_${customId}`)
+        this.customId = `${command.name}_${customId}`;
+        this.buttonObject = new ButtonBuilder().setCustomId(this.customId)
 
         this.command = command;
-        this.customId = `${command.name}_${customId}`;
         this.buttonId = customId;
     }
 
@@ -98,5 +99,23 @@ export default class ModularButton {
         this.buttonObject.setLabel(locale[labelKey]);
 
         return this.buttonObject;
+    }
+
+    /**
+     * @description Sets whether the button should be interacted by all users.
+     * @returns {this} The current ModularButton instance for method chaining.
+     */
+    setAllowOthers(): this {
+        this.allowOthers = true;
+        return this;
+    }
+
+    /**
+     * @description Retrieves the allowOthers property of the button.
+     * @returns {boolean} The allowOthers property of the button.
+     */
+    setOnlyAuthor(): this {
+        this.allowOthers = false;
+        return this;
     }
 }
