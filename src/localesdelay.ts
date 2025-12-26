@@ -1,6 +1,6 @@
 /**
  * @license     MIT
- * @file        src/modularlocale.ts
+ * @file        src/localesdelay.ts
  * @author      vicentefelipechile
  * @description Generic localization phrases used throughout the application.
  */
@@ -131,7 +131,7 @@ class ModularLocale {
                 .replace('{minutes}', '')
                 .trim();
         }
-        
+
         return formattedPhrase.replace(/\s+/g, ' ').trim();
     }
 }
@@ -234,7 +234,7 @@ const LOCALE_DELAY = {
         .setPhrase('このコマンドを再度使用するには、{seconds} 待つ必要があります.')
         .setPhrasePlural('このコマンドを再度使用するには、{seconds} と {minutes} 待つ必要があります.')
         .setPhraseOnlyMinutes('このコマンドを再度使用するには、{minutes} 待つ必要があります.'),
-    
+
     [Locale.Korean]: new ModularLocale(Locale.Korean)
         .setSeconds('{s} 초', '{s} 초')
         .setMinutes('{m} 분', '{m} 분')
@@ -311,21 +311,21 @@ const LOCALE_DELAY = {
         .setPhrase('Du måste vänta {seconds} innan du kan använda det här kommandot igen.')
         .setPhrasePlural('Du måste vänta {seconds} och {minutes} innan du kan använda det här kommandot igen.')
         .setPhraseOnlyMinutes('Du måste vänta {minutes} innan du kan använda det här kommandot igen.'),
-        
+
     [Locale.Turkish]: new ModularLocale(Locale.Turkish)
         .setSeconds('{s} saniye', '{s} saniye')
         .setMinutes('{m} dakika', '{m} dakika')
         .setPhrase('Bu komutu tekrar kullanmadan önce {seconds} beklemeniz gerekir.')
         .setPhrasePlural('Bu komutu tekrar kullanmadan önce {seconds} ve {minutes} beklemeniz gerekir.')
         .setPhraseOnlyMinutes('Bu komutu tekrar kullanmadan önce {minutes} beklemeniz gerekir.'),
-    
+
     [Locale.Ukrainian]: new ModularLocale(Locale.Ukrainian)
         .setSeconds('{s} секунду', '{s} секунди')
         .setMinutes('{m} хвилину', '{m} хвилини')
         .setPhrase('Вам потрібно почекати {seconds} перш ніж знову використовувати цю команду.')
         .setPhrasePlural('Вам потрібно почекати {seconds} і {minutes} перш ніж знову використовувати цю команду.')
         .setPhraseOnlyMinutes('Вам потрібно почекати {minutes} перш ніж знову використовувати цю команду.'),
-    
+
     [Locale.Hindi]: new ModularLocale(Locale.Hindi)
         .setSeconds('{s} सेकंड', '{s} सेकंड')
         .setMinutes('{m} मिनट', '{m} मिनट')

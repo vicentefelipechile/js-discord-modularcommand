@@ -18,20 +18,12 @@ import { ClientWithCommands } from "./types";
 // =================================================================================================
 
 /**
- * @interface InteractionHandlerArgs
- * @description Defines the arguments for the custom interaction handler function.
- */
-interface InteractionHandlerArgs {
-    /** The interaction received from Discord. */
-    interaction: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction;
-}
-
-/**
  * @type InteractionHandler
  * @description A function signature for a custom interaction handler.
+ * @param interaction The interaction received from Discord.
  * @returns {Promise<boolean | undefined>} A promise that resolves to `false` to stop the default handler, or `true`/`undefined` to continue.
  */
-type InteractionHandler = (args: InteractionHandlerArgs) => Promise<boolean | undefined>;
+type InteractionHandler = (interaction: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction) => Promise<boolean | undefined>;
 
 // =================================================================================================
 // Main Handler Function
@@ -58,7 +50,7 @@ export default function ModularCommandHandler(client: ClientWithCommands, custom
         }
 
         if (typeof customHandler === "function") {
-            const response = await customHandler({ interaction });
+            const response = await customHandler(interaction);
             if (response === false) return;
         }
 
@@ -101,10 +93,10 @@ export default function ModularCommandHandler(client: ClientWithCommands, custom
             }
         } catch (error) {
             const errorMessage = LOCALE_ERROR[interaction.locale] || 'An unexpected error occurred.';
-             if (interaction.replied || interaction.deferred) {
+            if (interaction.replied || interaction.deferred) {
                 await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
             } else {
-                 if ('reply' in interaction) {
+                if ('reply' in interaction) {
                     await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
                 }
             }

@@ -10,7 +10,7 @@
 // =================================================================================================
 
 import { Locale } from "discord.js";
-import LOCALE_DELAY from "./modularlocale";
+import LOCALE_DELAY from "./localesdelay";
 
 // =================================================================================================
 // Localization Phrases
