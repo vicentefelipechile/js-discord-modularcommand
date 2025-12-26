@@ -45,7 +45,7 @@ export default function ModularCommandHandler(client: ClientWithCommands, custom
     }
 
     const handler = async (interaction: BaseInteraction): Promise<void> => {
-        if (!interaction.isChatInputCommand() && !interaction.isMessageComponent() && !interaction.isModalSubmit()) {
+        if (!interaction.isChatInputCommand() && !interaction.isMessageComponent() && !interaction.isModalSubmit() && !interaction.isAutocomplete()) {
             return;
         }
 
@@ -54,23 +54,25 @@ export default function ModularCommandHandler(client: ClientWithCommands, custom
             if (response === false) return;
         }
 
-        let commandName: string;
-        if (interaction.isChatInputCommand()) {
-            commandName = interaction.commandName;
-        } else if (interaction.customId) {
-            commandName = interaction.customId.split('_')[0];
-        } else {
-            const errorMessage = LOCALE_ERROR[interaction.locale] || 'An unexpected error occurred.';
-            if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
+        let commandName: string = '';
+        if (!interaction.isAutocomplete()) {
+            if (interaction.isChatInputCommand()) {
+                commandName = interaction.commandName;
+            } else if (interaction.customId) {
+                commandName = interaction.customId.split('_')[0];
             } else {
-                // Type guard to ensure reply method exists
-                if ('reply' in interaction) {
-                    await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+                const errorMessage = LOCALE_ERROR[interaction.locale] || 'An unexpected error occurred.';
+                if (interaction.replied || interaction.deferred) {
+                    await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
+                } else {
+                    // Type guard to ensure reply method exists
+                    if ('reply' in interaction) {
+                        await interaction.reply({ content: errorMessage, flags: MessageFlags.Ephemeral });
+                    }
                 }
+                console.error(`Interaction does not have a commandName or customId: ${interaction.id}`);
+                return;
             }
-            console.error(`Interaction does not have a commandName or customId: ${interaction.id}`);
-            return;
         }
 
         const command = client.commands.get(commandName);
@@ -93,7 +95,7 @@ export default function ModularCommandHandler(client: ClientWithCommands, custom
             }
         } catch (error) {
             const errorMessage = LOCALE_ERROR[interaction.locale] || 'An unexpected error occurred.';
-            if (interaction.replied || interaction.deferred) {
+            if (!interaction.isAutocomplete() && (interaction.replied || interaction.deferred)) {
                 await interaction.followUp({ content: errorMessage, flags: MessageFlags.Ephemeral });
             } else {
                 if ('reply' in interaction) {

@@ -97,11 +97,15 @@ function createOptionBuilder(opt: CommandOption, description: string) {
             .setDescription(description)
             .setRequired(opt.required || false)
             .setDescriptionLocalizations(typeof opt.description === 'object' ? opt.description : {})
-            .setAutocomplete(opt.autocomplete || false);
 
         if (opt.choices && opt.choices.length > 0) {
             option.addChoices(...opt.choices);
         }
+
+        if (typeof option.setAutocomplete === 'function') {
+            option.setAutocomplete(opt.autocomplete || false);
+        }
+
         return option;
     };
 }
