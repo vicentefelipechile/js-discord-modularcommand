@@ -9,7 +9,7 @@
 // Imports
 // =================================================================================================
 
-import { BaseInteraction, Collection, CommandInteraction, MessageComponentInteraction, MessageFlags, ModalSubmitInteraction } from "discord.js";
+import { AutocompleteInteraction, BaseInteraction, Collection, CommandInteraction, MessageComponentInteraction, MessageFlags, ModalSubmitInteraction } from "discord.js";
 import { LOCALE_ERROR } from "./locales";
 import { ClientWithCommands } from "./types";
 
@@ -23,7 +23,7 @@ import { ClientWithCommands } from "./types";
  * @param interaction The interaction received from Discord.
  * @returns {Promise<boolean | undefined>} A promise that resolves to `false` to stop the default handler, or `true`/`undefined` to continue.
  */
-type InteractionHandler = (interaction: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction) => Promise<boolean | undefined>;
+type InteractionHandler = (interaction: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | AutocompleteInteraction) => Promise<boolean | undefined>;
 
 // =================================================================================================
 // Main Handler Function

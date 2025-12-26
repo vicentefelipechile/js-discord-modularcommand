@@ -14,8 +14,8 @@ import {
     APIApplicationCommandOptionChoice,
     ChatInputCommandInteraction,
     MessageComponentInteraction,
-    ModalSubmitInteraction,
     StringSelectMenuInteraction,
+    ModalSubmitInteraction,
     CommandInteraction,
     ButtonInteraction,
     SlashCommandBuilder,
@@ -59,6 +59,8 @@ export interface CommandOption {
     required?: boolean;
     /** An array of predefined choices the user can select from. */
     choices?: APIApplicationCommandOptionChoice[];
+    /** Defines if the option should be autocompleted. */
+    autocomplete?: boolean;
 }
 
 /**
@@ -155,7 +157,7 @@ export type CommandArgumentValue =
  * @type OptionBuilderType
  * @description Represents the type of an option builder function.
  */
-export type OptionBuilderType = 
+export type OptionBuilderType =
     | SlashCommandStringOption
     | SlashCommandBooleanOption
     | SlashCommandIntegerOption

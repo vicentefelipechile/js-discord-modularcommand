@@ -96,7 +96,8 @@ function createOptionBuilder(opt: CommandOption, description: string) {
         option.setName(opt.name)
             .setDescription(description)
             .setRequired(opt.required || false)
-            .setDescriptionLocalizations(typeof opt.description === 'object' ? opt.description : {});
+            .setDescriptionLocalizations(typeof opt.description === 'object' ? opt.description : {})
+            .setAutocomplete(opt.autocomplete || false);
 
         if (opt.choices && opt.choices.length > 0) {
             option.addChoices(...opt.choices);
