@@ -42,11 +42,16 @@ const COOLDOWNS_MAP = new Map<string, Map<string, number>>();
 
 /**
  * Registers a new command and its cooldown duration in the internal maps.
+ * If the command is already registered, an error is thrown to prevent accidental data loss.
  * @param {string} name - The name of the command to register.
  * @param {number} duration - The cooldown duration in seconds.
  * @returns {void}
  */
 export function cooldownRegister(name: string, duration: number): void {
+    if (COMMAND_CONFIG.has(name)) {
+        throw new Error(`Command '${name}' is already registered in the cooldown system.`);
+    }
+
     COMMAND_CONFIG.set(name, duration);
     COOLDOWNS_MAP.set(name, new Map<string, number>());
 };
@@ -57,7 +62,7 @@ export function cooldownRegister(name: string, duration: number): void {
  * @param {string} userId - The ID of the user.
  * @returns {number | undefined} The timestamp (in milliseconds) of the last execution, or `undefined` if not found.
  */
-export function cooldownGetUser(name:string, userId: string): number | undefined {
+export function cooldownGetUser(name: string, userId: string): number | undefined {
     return COOLDOWNS_MAP.get(name)?.get(userId);
 }
 
@@ -73,31 +78,37 @@ export function cooldownSetUser(name: string, userId: string): void {
 
 /**
  * Checks if a user is currently on cooldown for a specific command.
+ * Expired entries are automatically cleaned up to prevent memory leaks.
  * @param {string} name - The name of the command.
  * @param {string} userId - The ID of the user.
  * @returns {CooldownStatus} An object indicating if the user is in cooldown and the remaining time.
  */
 export default function isUserInCooldown(name: string, userId: string): CooldownStatus {
-    const lastTime = cooldownGetUser(name, userId);
+    // Validate first that the command exists, before doing any further lookups.
+    const cooldownDuration = COMMAND_CONFIG.get(name);
+
+    // This error indicates a developer mistake, as a command should be registered before being checked.
+    if (cooldownDuration === undefined) {
+        throw new Error(`Command '${name}' isn't registered in the cooldown system.`);
+    }
+
+    // Single reference to the command's user map, avoiding a second .get(name) lookup later.
+    const userMap = COOLDOWNS_MAP.get(name)!;
+    const lastTime = userMap.get(userId);
 
     // If the user has never used the command, they are not on cooldown.
     if (lastTime === undefined) {
         return { inCooldown: false, waitTime: 0 };
     }
 
-    const timePassed = Math.floor((Date.now() - lastTime) / 1000); // Time passed in seconds
-    const cooldownCommand = COMMAND_CONFIG.get(name);
+    const timePassed = ((Date.now() - lastTime) / 1000) | 0; // Bitwise truncation, faster than Math.floor
 
-    // This error indicates a developer mistake, as a command should be registered before being checked.
-    if (cooldownCommand === undefined) {
-        throw new Error(`Command '${name}' isn't registered in the cooldown system.`);
-    }
-
-    if (timePassed < cooldownCommand) {
+    if (timePassed < cooldownDuration) {
         // If the time passed is less than the required cooldown, the user is still on cooldown.
-        return { inCooldown: true, waitTime: cooldownCommand - timePassed };
+        return { inCooldown: true, waitTime: cooldownDuration - timePassed };
     }
 
-    // Otherwise, the cooldown has expired.
+    // Cooldown has expired — remove the entry to prevent memory leaks.
+    userMap.delete(userId);
     return { inCooldown: false, waitTime: 0 };
 }
